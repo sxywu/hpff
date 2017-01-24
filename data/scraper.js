@@ -3,7 +3,7 @@ var html2json = require('html2json').html2json;
 var _ = require('lodash');
 var fs = require('fs');
 
-var allStories = [];
+var allStories = JSON.parse(fs.readFileSync('./stories.json', 'utf-8') || '[]');
 function getPage(i) {
   console.log('page ' + i);
 
@@ -16,7 +16,8 @@ function getPage(i) {
         getStories(parsedData);
         getPage(i + 1);
       } catch (e) {
-        console.log(e.message);
+        console.log('parse error, page ', i);
+        getPage(i + 1);
       }
     });
   });
@@ -35,7 +36,7 @@ function getStories(node) {
     .filter(child => child.tag === 'tr')
     .each(story => {
       var obj = {};
-
+// console.log(JSON.stringify(story))
       var title = story.child[0].child[0].child[3];
       obj.title = {
         link: _.isArray(title.attr.href) ? _.last(title.attr.href) : title.attr.href,
@@ -58,6 +59,15 @@ function getStories(node) {
 
       var storydata = _.find(story.child[0].child,
           child => child.attr && child.attr.class === 'storydata');
+      if (!storydata) {
+        _.each(story.child[0].child, child => {
+          _.each(child.child, child => {
+            if (child.attr && child.attr.class === 'storydata') {
+              storydata = child;
+            }
+          });
+        });
+      }
 
       var genreIndex = getMetaData(storydata, 'Genres:');
       if (genreIndex > -1) {
@@ -71,6 +81,11 @@ function getStories(node) {
       var charactersIndex = getMetaData(storydata, 'Characters: ');
       if (charactersIndex > -1) {
         obj.characters = _.map(storydata.child[charactersIndex + 1].text
+          .replace('&nbsp;&nbsp;', '').split(', '), d => d.trim());
+      }
+      var pairingIndex = getMetaData(storydata, 'Pairings: ');
+      if (pairingIndex > -1) {
+        obj.pairings = _.map(storydata.child[pairingIndex + 1].text
           .replace('&nbsp;&nbsp;', '').split(', '), d => d.trim());
       }
       var publishedIndex = getMetaData(storydata, 'Published:');
@@ -101,4 +116,4 @@ function getMetaData(storydata, text) {
   return exists ? index : -1;
 }
 
-getPage(1);
+getPage(3222);
