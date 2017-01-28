@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Timeline from './visualizations/Timeline';
+import Matrix from './visualizations/Matrix';
 
 import _ from 'lodash';
 import * as d3 from 'd3';
@@ -57,6 +58,7 @@ class App extends Component {
     return (
       <div className="App">
         <Timeline {...props} {...this.state} />
+        <Matrix {...props} {...this.state} />
       </div>
     );
   }
