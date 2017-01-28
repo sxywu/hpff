@@ -3,14 +3,21 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
 
-var height = 250;
-var dotSize = 7;
+var dotSize = 6;
+var margin = {top: 20, left: 20};
+var width = 15 * 12 * dotSize + 2 * margin.left;
+var height = 130;
+var sf = 2;
+
 var xScale = d3.scaleTime()
-  .domain([new Date('1/1/2002'), new Date('11/1/2016')])
-  .range([0, 15 * 6 * dotSize]);
+  .domain([new Date('1/1/2002'), new Date('12/31/2016')])
+  .range([margin.left, width - margin.left]);
+var xAxis = d3.axisBottom()
+  .ticks(32)
+  .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
+  .scale(xScale);
 var sizeScale = d3.scaleLinear()
   .domain([1, 100]).range([3, 5]);
-var sf = 2;
 
 class Timeline extends Component {
 
@@ -18,6 +25,10 @@ class Timeline extends Component {
     this.crispyCanvas(this.refs.canvas, this.props, 'canvas');
     this.calculateData(this.props);
     this.renderData(this.props);
+
+    d3.select(this.refs.svg)
+      .append('g').attr('transform', 'translate(' + [0, height - margin.top] + ')')
+      .call(xAxis);
   }
 
   shouldComponentUpdate(nextProps) {
@@ -28,9 +39,9 @@ class Timeline extends Component {
   }
 
   crispyCanvas(canvas, props, name) {
-    canvas.width = props.width * sf;
+    canvas.width = width * sf;
     canvas.height = height * sf;
-    canvas.style.width = props.width + 'px';
+    canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
     this[name] = canvas.getContext('2d');
     this[name].scale(sf, sf);
@@ -53,8 +64,8 @@ class Timeline extends Component {
             var ratings = d3.max(stories, d => d.reviews.text);
             var color = props.colors(props.colorScale(ratings));
             return {
-              x: xScale(stories[0].publishGroup) + dotSize / 2,
-              y: height - (parseInt(i) + 0.5) * dotSize,
+              x: xScale(stories[0].publishGroup),
+              y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
               size,
               color,
             }
@@ -63,7 +74,7 @@ class Timeline extends Component {
   }
 
   renderData(props) {
-    this.canvas.clearRect(0, 0, props.width, height);
+    this.canvas.clearRect(0, 0, width, height);
     // this.canvas.globalCompositeOperation = 'overlay';
 
     _.each(this.months, month => {
@@ -75,9 +86,23 @@ class Timeline extends Component {
   }
 
   render() {
+    var style = {
+      position: 'relative',
+      width,
+      height,
+    };
+    var svgStyle = {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width,
+      height,
+    };
+
     return (
-      <div className="Timeline">
+      <div className="Timeline" style={style}>
         <canvas ref='canvas' />
+        <svg ref='svg' style={svgStyle} />
       </div>
     );
   }

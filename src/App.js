@@ -29,10 +29,7 @@ class App extends Component {
           d.reviews.text = parseInt(d.reviews.text);
           d.published = new Date(d.published);
           d.updated = new Date(d.updated);
-
-          var month = Math.ceil(d.published.getMonth() / 2);
-          month = (month * 2) + '/1/' + d.published.getFullYear();
-          d.publishGroup = new Date(month);
+          d.publishGroup = d3.timeMonth.floor(d.published);
 
           return d;
         });
@@ -55,8 +52,6 @@ class App extends Component {
     var props = {
       colors,
       colorScale,
-      width: 1200,
-      height: 1200,
     };
 
     return (
