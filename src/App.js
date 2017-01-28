@@ -9,7 +9,7 @@ import chroma from 'chroma-js';
 
 var numYears = 15;
 var colorScale = d3.scaleLog();
-var colors = chroma.scale(['#f5d5ca', '#f5d5ca', '#e7b7ce', '#da99d3', '#a2094a']);
+var colors = chroma.scale(['#f5d5ca', '#f5d5ca', '#f5d5ca', '#da99d3', '#a2094a']);
     // .range(['#f5d5ca', '#e7b7ce', '#da99d3', , '#a2094a']);
 
 class App extends Component {
