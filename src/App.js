@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import Timeline from './visualizations/Timeline';
-import Matrix from './visualizations/Matrix';
 
 import _ from 'lodash';
 import * as d3 from 'd3';
@@ -17,7 +16,8 @@ class App extends Component {
     super(props);
     this.state = {
       stories: {},
-      data: [],
+      pairings: {},
+      metadata: {},
     };
   }
 
@@ -40,13 +40,78 @@ class App extends Component {
     });
   }
 
+  getPairingsAndMetadata(pairings, metadata, d, pairing) {
+    if (!pairings[pairing]) {
+      pairings[pairing] = {};
+    }
+    if (!pairings[pairing][d.publishGroup]) {
+      pairings[pairing][d.publishGroup] = [];
+    }
+    pairings[pairing][d.publishGroup].push(d);
+
+    if (!metadata[pairing]) {
+      metadata[pairing] = {
+        genres: {},
+        pairings: {},
+        reviews: [],
+      };
+    }
+    _.each(d.genres, genre => {
+      if (!metadata[pairing].genres[genre]) {
+        metadata[pairing].genres[genre] = 0;
+      }
+      metadata[pairing].genres[genre] += 1;
+    });
+    _.each(d.pairings, p => {
+      if (p === pairing) return;
+
+      if (!metadata[pairing].pairings[p]) {
+        metadata[pairing].pairings[p] = 0;
+      }
+      metadata[pairing].pairings[p] += 1;
+    });
+    metadata[pairing].reviews.push(d.reviews.text);
+  }
+
   processData(stories) {
     var data = _.chain(stories)
       .values().flatten().value();
     var max = d3.max(data, d => d.reviews.text);
     colorScale.domain([1, max]);
 
-    this.setState({stories, data});
+    // first get all pairings
+    var pairings = {};
+    var metadata = {}
+    _.each(data, d => {
+      if (!d.pairings.length) {
+        this.getPairingsAndMetadata(pairings, metadata, d, 'No Pairing');
+      }
+      _.each(d.pairings, pairing => {
+        this.getPairingsAndMetadata(pairings, metadata, d, pairing);
+      });
+    });
+
+    pairings = _.mapValues(pairings, months => {
+        return _.chain(months)
+          .map(stories => {
+            var i = -1;
+            return _.chain(stories)
+              .sortBy(d => d.published)
+              .groupBy(d => {
+                i += 1;
+                return Math.floor(i / 100);
+              }).map((stories, i) => {
+                return {
+                  extent: d3.extent(stories, story => story.published),
+                  month: stories[0].publishGroup,
+                  max: _.maxBy(stories, story => story.reviews.text),
+                  length: stories.length,
+                };
+              }).value();
+          }).flatten().value();
+      });
+
+    this.setState({stories, pairings, metadata});
   }
 
   render() {
@@ -58,7 +123,6 @@ class App extends Component {
     return (
       <div className="App">
         <Timeline {...props} {...this.state} />
-        <Matrix {...props} {...this.state} />
       </div>
     );
   }

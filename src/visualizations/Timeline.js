@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 var dotSize = 6;
 var margin = {top: 20, left: 20};
 var width = 15 * 12 * dotSize + 2 * margin.left;
-var height = 130;
+var height = 600;
 var sf = 2;
 
 var xScale = d3.scaleTime()
@@ -17,7 +17,7 @@ var xAxis = d3.axisBottom()
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .scale(xScale);
 var sizeScale = d3.scaleLinear()
-  .domain([1, 100]).range([3, 5]);
+  .domain([1, 100]).range([2, 5]);
 
 class Timeline extends Component {
 
@@ -49,28 +49,23 @@ class Timeline extends Component {
 
   calculateData(props) {
     // group data by months
-    this.months = _.chain(props.data)
-      .groupBy(d => d.publishGroup)
+    this.months = _.chain(props.pairings)
+      .values().flatten()
+      .groupBy(d => d.month)
       .map(stories => {
-        // first sort by number of reviews
-        var i = -1;
-        return _.chain(stories)
-          // .sortBy(d => -d.reviews.text)
-          .groupBy(d => {
-            i += 1;
-            return Math.floor(i / 100);
-          }).map((stories, i) => {
-            var size = sizeScale(stories.length);
-            var ratings = d3.max(stories, d => d.reviews.text);
-            var color = props.colors(props.colorScale(ratings));
-            return {
-              x: xScale(stories[0].publishGroup),
-              y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
-              size,
-              color,
-            }
-          }).value();
+        return _.map(stories, (d, i) => {
+          var size = sizeScale(d.length);
+          var color = props.colors(props.colorScale(d.max.reviews.text));
+          return {
+            x: xScale(d.month),
+            y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
+            size,
+            color,
+          }
+        });
       }).flatten().value();
+
+      console.log(this.months.length);
   }
 
   renderData(props) {
