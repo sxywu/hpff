@@ -8,7 +8,7 @@ import chroma from 'chroma-js';
 
 var numYears = 15;
 var colorScale = d3.scaleLog();
-var colors = chroma.scale(['#f5d5ca', '#f5d5ca', '#f5d5ca', '#da99d3', '#a2094a']);
+var colors = chroma.scale(['#f5d5ca', '#f5d5ca', '#da99d3', '#a2094a']);
     // .range(['#f5d5ca', '#e7b7ce', '#da99d3', , '#a2094a']);
 
 class App extends Component {
@@ -74,25 +74,26 @@ class App extends Component {
   }
 
   processData(stories) {
+    // don't start processing data until all the data is back
     if (_.size(stories) !== numYears) {
       return this.setState({stories});
     }
 
     var data = _.chain(stories)
       .values().flatten().value();
-    var max = d3.max(data, d => d.reviews.text);
-    colorScale.domain([1, max]);
+    // var max = d3.max(data, d => d.reviews.text);
+    colorScale.domain([1, 10000]);
 
     // first get all pairings
     var pairings = {};
     var metadata = {}
     _.each(data, d => {
       if (!d.pairings.length) {
-        this.getPairingsAndMetadata(pairings, metadata, d, 'No Pairing');
+        return this.getPairingsAndMetadata(pairings, metadata, d, 'No Pairing');
       }
-      _.each(d.pairings, pairing => {
-        this.getPairingsAndMetadata(pairings, metadata, d, pairing);
-      });
+      // _.each(d.pairings, pairing => {
+        this.getPairingsAndMetadata(pairings, metadata, d, d.pairings[0]);
+      // });
     });
 
     pairings = _.mapValues(pairings, (months, pairing) => {
@@ -103,7 +104,7 @@ class App extends Component {
               .sortBy(d => d.published)
               .groupBy(d => {
                 i += 1;
-                return Math.floor(i / 20);
+                return Math.floor(i / 10);
               }).map((stories, i) => {
                 return {
                   pairing,
@@ -116,7 +117,6 @@ class App extends Component {
           }).flatten().value();
       });
 
-          console.log(pairings);
     this.setState({stories, pairings, metadata});
   }
 
@@ -127,7 +127,8 @@ class App extends Component {
     };
 
     var timelines = _.chain(this.state.pairings)
-      .filter(d => d.length > 10)
+      .filter((d, pairing) => pairing !== 'No Pairing' &&
+        pairing !== 'Other Pairing' && pairing !== 'Others' && d.length > 100)
       .sortBy(d => -d.length)
       .map(dots => {
         var pairing = dots[0].pairing;

@@ -3,10 +3,10 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
 
-var dotSize = 6;
+var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 15 * 12 * dotSize + 2 * margin.left;
-var height = 150;
+var height = 175;
 var sf = 2;
 
 var xScale = d3.scaleTime()
@@ -17,7 +17,7 @@ var xAxis = d3.axisBottom()
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .scale(xScale);
 var sizeScale = d3.scaleLinear()
-  .domain([1, 20]).range([2, 5]);
+  .domain([1, 10]).range([2, 4]);
 
 class Timeline extends Component {
 
@@ -93,7 +93,7 @@ class Timeline extends Component {
 
     return (
       <div className="Timeline" style={style}>
-        <h3>{this.props.pairing}</h3>
+        <h3>{this.props.pairing} ({this.props.dots.length})</h3>
         <canvas ref='canvas' style={vizStyle} />
         <svg ref='svg' style={vizStyle} />
       </div>
