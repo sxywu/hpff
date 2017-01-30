@@ -74,6 +74,10 @@ class App extends Component {
   }
 
   processData(stories) {
+    if (_.size(stories) !== numYears) {
+      return this.setState({stories});
+    }
+
     var data = _.chain(stories)
       .values().flatten().value();
     var max = d3.max(data, d => d.reviews.text);
@@ -91,7 +95,7 @@ class App extends Component {
       });
     });
 
-    pairings = _.mapValues(pairings, months => {
+    pairings = _.mapValues(pairings, (months, pairing) => {
         return _.chain(months)
           .map(stories => {
             var i = -1;
@@ -99,9 +103,10 @@ class App extends Component {
               .sortBy(d => d.published)
               .groupBy(d => {
                 i += 1;
-                return Math.floor(i / 100);
+                return Math.floor(i / 20);
               }).map((stories, i) => {
                 return {
+                  pairing,
                   extent: d3.extent(stories, story => story.published),
                   month: stories[0].publishGroup,
                   max: _.maxBy(stories, story => story.reviews.text),
@@ -111,6 +116,7 @@ class App extends Component {
           }).flatten().value();
       });
 
+          console.log(pairings);
     this.setState({stories, pairings, metadata});
   }
 
@@ -120,9 +126,22 @@ class App extends Component {
       colorScale,
     };
 
+    var timelines = _.chain(this.state.pairings)
+      .filter(d => d.length > 10)
+      .sortBy(d => -d.length)
+      .map(dots => {
+        var pairing = dots[0].pairing;
+        var data = {
+          dots,
+          pairing,
+          metadata: this.state.metadata[pairing]
+        };
+        return <Timeline {...props} {...data} />
+      }).value();
+
     return (
       <div className="App">
-        <Timeline {...props} {...this.state} />
+        {timelines}
       </div>
     );
   }

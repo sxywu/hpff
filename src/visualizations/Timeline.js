@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 var dotSize = 6;
 var margin = {top: 20, left: 20};
 var width = 15 * 12 * dotSize + 2 * margin.left;
-var height = 600;
+var height = 150;
 var sf = 2;
 
 var xScale = d3.scaleTime()
@@ -17,7 +17,7 @@ var xAxis = d3.axisBottom()
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .scale(xScale);
 var sizeScale = d3.scaleLinear()
-  .domain([1, 100]).range([2, 5]);
+  .domain([1, 20]).range([2, 5]);
 
 class Timeline extends Component {
 
@@ -49,8 +49,7 @@ class Timeline extends Component {
 
   calculateData(props) {
     // group data by months
-    this.months = _.chain(props.pairings)
-      .values().flatten()
+    this.months = _.chain(props.dots)
       .groupBy(d => d.month)
       .map(stories => {
         return _.map(stories, (d, i) => {
@@ -64,8 +63,6 @@ class Timeline extends Component {
           }
         });
       }).flatten().value();
-
-      console.log(this.months.length);
   }
 
   renderData(props) {
@@ -86,7 +83,7 @@ class Timeline extends Component {
       width,
       height,
     };
-    var svgStyle = {
+    var vizStyle = {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -96,8 +93,9 @@ class Timeline extends Component {
 
     return (
       <div className="Timeline" style={style}>
-        <canvas ref='canvas' />
-        <svg ref='svg' style={svgStyle} />
+        <h3>{this.props.pairing}</h3>
+        <canvas ref='canvas' style={vizStyle} />
+        <svg ref='svg' style={vizStyle} />
       </div>
     );
   }
