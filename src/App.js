@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import './App.css';
-import Timeline from './visualizations/Timeline';
-
 import _ from 'lodash';
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
+
+import './App.css';
+import Timeline from './visualizations/Timeline';
+import dates from './data/dates.json';
 
 var numYears = 15;
 var colorScale = d3.scaleLog();
@@ -18,10 +19,16 @@ class App extends Component {
       stories: {},
       pairings: {},
       metadata: {},
+      dots: {},
+      pairing: 'James/Lily',
     };
   }
 
   componentWillMount() {
+    _.each(dates, date => {
+      date[2] = new Date(date[2]);
+    });
+
     _.times(numYears, i => {
       var year = 2002 + i;
       d3.json(process.env.PUBLIC_URL + '/years/' + year + '.json', data => {
@@ -96,7 +103,7 @@ class App extends Component {
       // });
     });
 
-    pairings = _.mapValues(pairings, (months, pairing) => {
+    var dots = _.mapValues(pairings, (months, pairing) => {
         return _.chain(months)
           .map(stories => {
             var i = -1;
@@ -117,32 +124,25 @@ class App extends Component {
           }).flatten().value();
       });
 
-    this.setState({stories, pairings, metadata});
+    this.setState({stories, pairings, dots, metadata});
   }
 
   render() {
     var props = {
       colors,
       colorScale,
+      dates,
+      gray: '#665059',
     };
 
-    var timelines = _.chain(this.state.pairings)
-      .filter((d, pairing) => pairing !== 'No Pairing' &&
-        pairing !== 'Other Pairing' && pairing !== 'Others' && d.length > 100)
-      .sortBy(d => -d.length)
-      .map(dots => {
-        var pairing = dots[0].pairing;
-        var data = {
-          dots,
-          pairing,
-          metadata: this.state.metadata[pairing]
-        };
-        return <Timeline {...props} {...data} />
-      }).value();
+    var timelineData = {
+      pairing: this.state.pairing,
+      dots: this.state.dots[this.state.pairing] || [],
+    };
 
     return (
       <div className="App">
-        {timelines}
+        <Timeline {...props} {...timelineData} />
       </div>
     );
   }

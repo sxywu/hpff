@@ -5,16 +5,17 @@ import * as d3 from 'd3';
 
 var dotSize = 5;
 var margin = {top: 20, left: 20};
-var width = 15 * 12 * dotSize + 2 * margin.left;
-var height = 175;
+var width = 15.25 * 12 * dotSize + 2 * margin.left;
+var height = 400;
 var sf = 2;
 
 var xScale = d3.scaleTime()
-  .domain([new Date('1/1/2002'), new Date('12/31/2016')])
+  .domain([new Date('9/1/2001'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var xAxis = d3.axisBottom()
   .ticks(32)
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
+  .tickSizeOuter(0)
   .scale(xScale);
 var sizeScale = d3.scaleLinear()
   .domain([1, 10]).range([2, 4]);
@@ -23,17 +24,23 @@ class Timeline extends Component {
 
   componentDidMount() {
     this.crispyCanvas(this.refs.canvas, this.props, 'canvas');
-    this.calculateData(this.props);
-    this.renderData(this.props);
+    this.calculateDots(this.props);
+    this.renderDots(this.props);
 
-    d3.select(this.refs.svg)
-      .append('g').attr('transform', 'translate(' + [0, height - margin.top] + ')')
+    this.svg = d3.select(this.refs.svg);
+
+    this.annotations = this.svg.append('g')
+      .attr('transform', 'translate(' + [0, margin.top] + ')');
+    this.renderDates();
+    // axis
+    this.svg.append('g')
+      .attr('transform', 'translate(' + [0, height - margin.top] + ')')
       .call(xAxis);
   }
 
   shouldComponentUpdate(nextProps) {
-    this.calculateData(nextProps);
-    this.renderData(nextProps);
+    this.calculateDots(nextProps);
+    this.renderDots(nextProps);
 
     return false;
   }
@@ -47,7 +54,7 @@ class Timeline extends Component {
     this[name].scale(sf, sf);
   }
 
-  calculateData(props) {
+  calculateDots(props) {
     // group data by months
     this.months = _.chain(props.dots)
       .groupBy(d => d.month)
@@ -65,7 +72,7 @@ class Timeline extends Component {
       }).flatten().value();
   }
 
-  renderData(props) {
+  renderDots(props) {
     this.canvas.clearRect(0, 0, width, height);
     // this.canvas.globalCompositeOperation = 'overlay';
 
@@ -75,6 +82,38 @@ class Timeline extends Component {
       this.canvas.arc(month.x, month.y, month.size / 2, 0, 2 * Math.PI, false);
       this.canvas.fill();
     });
+  }
+
+  renderDates() {
+    var fontSize = 10;
+    var y = height * .55;
+    var dates = this.annotations.selectAll('date')
+      .data(this.props.dates).enter().append('g')
+      .classed('date', true)
+      .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
+
+    dates.append('line')
+      .attr('y1', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
+      .attr('y2', height - 2 * margin.top - y)
+      .attr('stroke', this.props.gray)
+      .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '3 3')
+      .attr('opacity', 0.5);
+
+    dates.append('circle')
+      .attr('cy', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
+      .attr('r', (fontSize + 2) / 2)
+      .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
+      .attr('stroke', this.props.gray)
+      .attr('stroke-width', 2);
+
+    dates.append('text')
+      .attr('y', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
+      .attr('dy', '.35em')
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
+      .attr('font-size', fontSize)
+      .attr('font-weight', 600)
+      .text(d => d[0]);
   }
 
   render() {
@@ -93,7 +132,7 @@ class Timeline extends Component {
 
     return (
       <div className="Timeline" style={style}>
-        <h3>{this.props.pairing} ({this.props.dots.length})</h3>
+        <h3>{this.props.pairing}</h3>
         <canvas ref='canvas' style={vizStyle} />
         <svg ref='svg' style={vizStyle} />
       </div>
