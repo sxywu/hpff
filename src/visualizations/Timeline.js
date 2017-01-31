@@ -7,7 +7,7 @@ var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 16 * 12 * dotSize + 2 * margin.left;
-var height = 400;
+var height = 320;
 var sf = 2;
 
 var xScale = d3.scaleTime()
@@ -109,28 +109,28 @@ class Timeline extends Component {
 
   renderDates() {
     var fontSize = 10;
-    var y = height * .55;
+    var y = 2.75 * gifSize;
     var dates = this.annotations.selectAll('date')
       .data(this.props.dates).enter().append('g')
       .classed('date', true)
       .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
 
     dates.append('line')
-      .attr('y1', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
+      .attr('y1', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
       .attr('y2', height - 2 * margin.top - y)
       .attr('stroke', this.props.gray)
       // .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '5 5')
       .attr('opacity', 0.5);
 
     dates.append('circle')
-      .attr('cy', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
+      .attr('cy', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
       .attr('r', (fontSize + 2) / 2)
       .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
       .attr('stroke', this.props.gray)
       .attr('stroke-width', 2);
 
     dates.append('text')
-      .attr('y', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
+      .attr('y', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
       .attr('dy', '.35em')
       .attr('text-anchor', 'middle')
       .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
@@ -169,7 +169,7 @@ class Timeline extends Component {
 
     images = enter.merge(images)
       .attr('transform', (d, i) => {
-        d.y = i % 2 ? gifSize : 2 * gifSize;
+        d.y = i % 2 ? 0.5 * gifSize : 1.5 * gifSize;
         return 'translate(' + [xScale(d.date), d.y] + ')'
       });
 
@@ -196,7 +196,6 @@ class Timeline extends Component {
 
     return (
       <div className='Timeline' style={style}>
-        <h3>{this.props.pairing}</h3>
         <canvas ref='canvas' style={vizStyle} />
         <svg ref='svg' style={vizStyle} />
       </div>
