@@ -6,6 +6,10 @@ import chroma from 'chroma-js';
 import './App.css';
 import Timeline from './visualizations/Timeline';
 import dates from './data/dates.json';
+import allGifs from './data/gifs.json';
+var gifs = _.map(allGifs.all, file =>
+  [file.replace('.gif', ''), require('./images/' + file)]);
+var gifsNested = allGifs.nested;
 
 var numYears = 15;
 var colorScale = d3.scaleLog();
@@ -20,7 +24,7 @@ class App extends Component {
       pairings: {},
       metadata: {},
       dots: {},
-      pairing: 'James/Lily',
+      pairing: 'Ron/Hermione',
     };
   }
 
@@ -124,6 +128,7 @@ class App extends Component {
           }).flatten().value();
       });
 
+    console.log(pairings, dots)
     this.setState({stories, pairings, dots, metadata});
   }
 
@@ -131,8 +136,10 @@ class App extends Component {
     var props = {
       colors,
       colorScale,
-      dates,
       gray: '#665059',
+      dates,
+      gifs,
+      gifsNested,
     };
 
     var timelineData = {

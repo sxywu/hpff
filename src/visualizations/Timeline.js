@@ -3,14 +3,15 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
 
+var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
-var width = 15.25 * 12 * dotSize + 2 * margin.left;
+var width = 16 * 12 * dotSize + 2 * margin.left;
 var height = 400;
 var sf = 2;
 
 var xScale = d3.scaleTime()
-  .domain([new Date('9/1/2001'), new Date('12/31/2016')])
+  .domain([new Date('2/1/2001'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var xAxis = d3.axisBottom()
   .ticks(32)
@@ -28,10 +29,15 @@ class Timeline extends Component {
     this.renderDots(this.props);
 
     this.svg = d3.select(this.refs.svg);
+    this.defs = this.svg.append('defs');
+
+    this.initiateGifs();
 
     this.annotations = this.svg.append('g')
       .attr('transform', 'translate(' + [0, margin.top] + ')');
+    this.renderGifs(this.props);
     this.renderDates();
+
     // axis
     this.svg.append('g')
       .attr('transform', 'translate(' + [0, height - margin.top] + ')')
@@ -41,6 +47,7 @@ class Timeline extends Component {
   shouldComponentUpdate(nextProps) {
     this.calculateDots(nextProps);
     this.renderDots(nextProps);
+    this.renderGifs(nextProps);
 
     return false;
   }
@@ -52,6 +59,22 @@ class Timeline extends Component {
     canvas.style.height = height + 'px';
     this[name] = canvas.getContext('2d');
     this[name].scale(sf, sf);
+  }
+
+  initiateGifs() {
+    // taken from Nadieh's January datasketches:
+    // https://github.com/nbremer/datasketches/blob/gh-pages/january/code/nadieh/js/main.js
+    this.defs.selectAll('pattern')
+  		.data(this.props.gifs)
+  		.enter().append('pattern')
+  		.attr('id', d => 'gif-' + d[0])
+  		.attr('patternUnits','objectBoundingBox')
+  		.attr('height', '100%')
+  		.attr('width', '100%')
+  		.append('image')
+  			.attr('xlink:href', d => d[1])
+        .attr('y', 0.5 * gifSize)
+        .attr('height', gifSize);
   }
 
   calculateDots(props) {
@@ -96,7 +119,7 @@ class Timeline extends Component {
       .attr('y1', d => d[0] === 7 && d[3] === 'book' ? -1.5 * fontSize : 0)
       .attr('y2', height - 2 * margin.top - y)
       .attr('stroke', this.props.gray)
-      .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '3 3')
+      // .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '5 5')
       .attr('opacity', 0.5);
 
     dates.append('circle')
@@ -116,6 +139,47 @@ class Timeline extends Component {
       .text(d => d[0]);
   }
 
+  renderGifs(props) {
+    var gifs = _.map(props.gifsNested[props.pairing], (gifs, year) => {
+      year = parseInt(year);
+      var image = gifs[_.random(gifs.length - 1)];
+      var date = _.find(props.dates, d => d[0] === year && d[3] === 'film')[2];
+      return {
+        year,
+        date,
+        image,
+      }
+    });
+
+    var images = this.annotations.selectAll('.gif')
+      .data(gifs);
+
+    images.exit().remove();
+
+    var enter = images.enter().append('g')
+      .classed('gif', true);
+
+    enter.append('line')
+      .attr('stroke', this.props.gray)
+      // .attr('stroke-dasharray', '5 5')
+      .attr('opacity', 0.5);
+
+    enter.append('circle')
+      .attr('r', gifSize);
+
+    images = enter.merge(images)
+      .attr('transform', (d, i) => {
+        d.y = i % 2 ? gifSize : 2 * gifSize;
+        return 'translate(' + [xScale(d.date), d.y] + ')'
+      });
+
+    images.select('line')
+      .attr('y2', d => height - 2 * margin.top - d.y);
+
+    images.select('circle')
+      .style('fill', d => 'url(#gif-' + d.image + ')');
+  }
+
   render() {
     var style = {
       position: 'relative',
@@ -131,7 +195,7 @@ class Timeline extends Component {
     };
 
     return (
-      <div className="Timeline" style={style}>
+      <div className='Timeline' style={style}>
         <h3>{this.props.pairing}</h3>
         <canvas ref='canvas' style={vizStyle} />
         <svg ref='svg' style={vizStyle} />
