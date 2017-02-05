@@ -19,7 +19,7 @@ var xAxis = d3.axisBottom()
   .tickSizeOuter(0)
   .scale(xScale);
 var sizeScale = d3.scaleLinear()
-  .domain([1, 10]).range([2, 4]);
+  .domain([1, 5]).range([2, 4]);
 
 class Timeline extends Component {
 
@@ -36,7 +36,6 @@ class Timeline extends Component {
     this.annotations = this.svg.append('g')
       .attr('transform', 'translate(' + [0, margin.top] + ')');
     this.renderGifs(this.props);
-    this.renderDates();
 
     // axis
     this.svg.append('g')
@@ -85,7 +84,7 @@ class Timeline extends Component {
           .sortBy(d => d.published)
           .groupBy(d => {
             i += 1;
-            return Math.floor(i / 10);
+            return Math.floor(i / 5);
           }).map((stories, i) => {
             return {
               pairing: stories[0].pairing,
@@ -124,38 +123,6 @@ class Timeline extends Component {
       this.canvas.arc(month.x, month.y, month.size / 2, 0, 2 * Math.PI, false);
       this.canvas.fill();
     });
-  }
-
-  renderDates() {
-    var fontSize = 10;
-    var y = 2.75 * gifSize;
-    var dates = this.annotations.selectAll('date')
-      .data(this.props.dates).enter().append('g')
-      .classed('date', true)
-      .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
-
-    dates.append('line')
-      .attr('y1', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
-      .attr('y2', height - 2 * margin.top - y)
-      .attr('stroke', this.props.gray)
-      // .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '5 5')
-      .attr('opacity', 0.5);
-
-    dates.append('circle')
-      .attr('cy', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
-      .attr('r', (fontSize + 2) / 2)
-      .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
-      .attr('stroke', this.props.gray)
-      .attr('stroke-width', 2);
-
-    dates.append('text')
-      .attr('y', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
-      .attr('dy', '.35em')
-      .attr('text-anchor', 'middle')
-      .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
-      .attr('font-size', fontSize)
-      .attr('font-weight', 600)
-      .text(d => d[0]);
   }
 
   renderGifs(props) {

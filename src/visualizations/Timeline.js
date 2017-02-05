@@ -23,7 +23,7 @@ var area = d3.area()
   .x(d => xScale(d.date))
   .y1(d => yScale(d.length))
   .y0(yScale(0))
-  // .curve(d3.curveCatmullRom.alpha(0.5));
+  .curve(d3.curveCatmullRom);
 
 class Timeline extends Component {
 
@@ -35,41 +35,16 @@ class Timeline extends Component {
     this.histogram = this.container.append('g')
       // .attr('fill-opacity', 0.5);
     this.lines = this.container.append('g');
+    this.annotations = this.container.append('g');
 
-    // this.renderHistogram(this.props);
+    this.renderDates();
     this.renderLines(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
-    // this.renderHistogram(nextProps);
     this.renderLines(nextProps);
 
     return false;
-  }
-
-  renderHistogram(props) {
-    var data = _.chain(props.data)
-      .groupBy(d => d.publishGroup)
-      .map(stories => {
-        return {
-          date: stories[0].publishGroup,
-          length: stories.length,
-          max: d3.max(stories, d => d.reviews.text),
-        }
-      }).value();
-
-    var yMax = d3.max(data, d => d.length);
-    yScale.domain([0, yMax]);
-
-    // render
-    this.histogram.selectAll('.bar')
-      .data(data).enter().append('rect')
-      .classed('bar', true)
-      .attr('x', d => xScale(d.date))
-      .attr('y', d => yScale(d.length))
-      .attr('width', dotSize)
-      .attr('height', d => height - margin.top - yScale(d.length))
-      .attr('fill', d => props.colors1(props.colorScale(d.max)));
   }
 
   renderLines(props) {
@@ -97,6 +72,39 @@ class Timeline extends Component {
       .attr('d', area)
       .attr('fill', props.pink)
       .attr('fill-opacity', 0.25);
+  }
+
+
+  renderDates() {
+    var fontSize = 10;
+    var y = height * 0.15;
+    var dates = this.annotations.selectAll('date')
+      .data(this.props.dates).enter().append('g')
+      .classed('date', true)
+      .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
+
+    dates.append('line')
+      .attr('y1', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
+      .attr('y2', height - margin.top - y)
+      .attr('stroke', this.props.gray)
+      // .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '5 5')
+      .attr('opacity', 0.5);
+
+    dates.append('circle')
+      .attr('cy', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
+      .attr('r', (fontSize + 2) / 2)
+      .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
+      .attr('stroke', this.props.gray)
+      .attr('stroke-width', 2);
+
+    dates.append('text')
+      .attr('y', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
+      .attr('dy', '.35em')
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
+      .attr('font-size', fontSize)
+      .attr('font-weight', 600)
+      .text(d => d[0]);
   }
 
   render() {
