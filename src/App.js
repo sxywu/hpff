@@ -8,7 +8,7 @@ import Timeline from './visualizations/Timeline';
 import dates from './data/dates.json';
 import allGifs from './data/gifs.json';
 var gifs = _.map(allGifs.all, file =>
-  [file.replace('.gif', ''), require('./images/' + file)]);
+  [file.replace('.gif', ''), require('./images/gifs/' + file)]);
 var gifsNested = allGifs.nested;
 
 var numYears = 15;
