@@ -5,6 +5,8 @@ import chroma from 'chroma-js';
 
 import './App.css';
 import Timeline from './visualizations/Timeline';
+import Reviews from './visualizations/Reviews';
+
 import dates from './data/dates.json';
 import allGifs from './data/gifs.json';
 var gifs = _.map(allGifs.all, file =>
@@ -20,11 +22,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      data: [],
       stories: {},
       pairings: {},
-      metadata: {},
-      dots: {},
-      pairing: 'Ron/Hermione',
+      genres: {},
+      selected: 'Hermione',
     };
   }
 
@@ -51,7 +53,10 @@ class App extends Component {
     });
   }
 
-  getPairingsAndMetadata(pairings, metadata, d, pairing) {
+  getPairingsAndMetadata(pairings, genres, d, pairing) {
+    if (pairing === 'Other Pairing' || pairing === 'Others' ||
+      pairing === 'No Pairing' || pairing === 'undefined') return;
+
     if (!pairings[pairing]) {
       pairings[pairing] = {};
     }
@@ -60,28 +65,17 @@ class App extends Component {
     }
     pairings[pairing][d.publishGroup].push(d);
 
-    if (!metadata[pairing]) {
-      metadata[pairing] = {
-        genres: {},
-        pairings: {},
-        reviews: [],
-      };
-    }
     _.each(d.genres, genre => {
-      if (!metadata[pairing].genres[genre]) {
-        metadata[pairing].genres[genre] = 0;
-      }
-      metadata[pairing].genres[genre] += 1;
-    });
-    _.each(d.pairings, p => {
-      if (p === pairing) return;
+      if (!genre || genre === 'Romance') return;
 
-      if (!metadata[pairing].pairings[p]) {
-        metadata[pairing].pairings[p] = 0;
+      if (!genres[pairing]) {
+        genres[pairing] = {};
       }
-      metadata[pairing].pairings[p] += 1;
+      if (!genres[pairing][genre]) {
+        genres[pairing][genre] = [];
+      }
+      genres[pairing][genre].push(d);
     });
-    metadata[pairing].reviews.push(d.reviews.text);
   }
 
   processData(stories) {
@@ -97,39 +91,17 @@ class App extends Component {
 
     // first get all pairings
     var pairings = {};
-    var metadata = {}
+    var genres = {}
     _.each(data, d => {
       if (!d.pairings.length) {
-        return this.getPairingsAndMetadata(pairings, metadata, d, 'No Pairing');
+        return this.getPairingsAndMetadata(pairings, genres, d, 'No Pairing');
       }
       // _.each(d.pairings, pairing => {
-        this.getPairingsAndMetadata(pairings, metadata, d, d.pairings[0]);
+        this.getPairingsAndMetadata(pairings, genres, d, d.pairings[0]);
       // });
     });
 
-    var dots = _.mapValues(pairings, (months, pairing) => {
-        return _.chain(months)
-          .map(stories => {
-            var i = -1;
-            return _.chain(stories)
-              .sortBy(d => d.published)
-              .groupBy(d => {
-                i += 1;
-                return Math.floor(i / 10);
-              }).map((stories, i) => {
-                return {
-                  pairing,
-                  extent: d3.extent(stories, story => story.published),
-                  month: stories[0].publishGroup,
-                  max: _.maxBy(stories, story => story.reviews.text),
-                  length: stories.length,
-                };
-              }).value();
-          }).flatten().value();
-      });
-
-    console.log(pairings, dots)
-    this.setState({stories, pairings, dots, metadata});
+    this.setState({stories, data, pairings, genres});
   }
 
   render() {
@@ -142,14 +114,18 @@ class App extends Component {
       gifsNested,
     };
 
-    var timelineData = {
-      pairing: this.state.pairing,
-      dots: this.state.dots[this.state.pairing] || [],
-    };
+    //
+    // get pairings for selected character
+    var reviews = _.chain(this.state.pairings)
+      .filter((dots, pairing) => _.includes(pairing, this.state.selected))
+      .map(dots => <Reviews {...props} dots={dots} />)
+      .value();
 
     return (
       <div className="App">
-        <Timeline {...props} {...timelineData} />
+        <h3>{this.state.pairing}</h3>
+        <Timeline {...props} {...this.state} />
+        {reviews}
       </div>
     );
   }

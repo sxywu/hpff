@@ -78,15 +78,34 @@ class Timeline extends Component {
   }
 
   calculateDots(props) {
+    var dots = _.chain(props.dots)
+      .map(stories => {
+        var i = -1;
+        return _.chain(stories)
+          .sortBy(d => d.published)
+          .groupBy(d => {
+            i += 1;
+            return Math.floor(i / 10);
+          }).map((stories, i) => {
+            return {
+              pairing: stories[0].pairing,
+              extent: d3.extent(stories, story => story.published),
+              month: stories[0].publishGroup,
+              max: _.maxBy(stories, story => story.reviews.text),
+              length: stories.length,
+            };
+          }).value();
+      }).flatten().value();
+
     // group data by months
-    this.months = _.chain(props.dots)
+    this.months = _.chain(dots)
       .groupBy(d => d.month)
       .map(stories => {
         return _.map(stories, (d, i) => {
           var size = sizeScale(d.length);
           var color = props.colors(props.colorScale(d.max.reviews.text));
           return {
-            x: xScale(d.month),
+            x: xScale(d.month) + dotSize / 2,
             y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
             size,
             color,
