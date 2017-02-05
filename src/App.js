@@ -6,6 +6,7 @@ import chroma from 'chroma-js';
 import './App.css';
 import Timeline from './visualizations/Timeline';
 import Reviews from './visualizations/Reviews';
+import Graph from './visualizations/Graph';
 
 import dates from './data/dates.json';
 import allGifs from './data/gifs.json';
@@ -127,7 +128,7 @@ class App extends Component {
 
     return (
       <div className="App">
-        <h3>{this.state.pairing}</h3>
+        <Graph {...props} {...this.state} />
         <Timeline {...props} {...this.state} pairings={pairings} />
         {reviews}
       </div>
