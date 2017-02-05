@@ -15,7 +15,12 @@ var gifsNested = allGifs.nested;
 
 var numYears = 15;
 var colorScale = d3.scaleLog();
-var colors = chroma.scale(['#f5d5ca', '#f5d5ca', '#da99d3', '#a2094a']);
+var cream = '#fff1ec';
+var purple = '#ad32ed';
+var pink = '#ed3282';
+var gray = '#665059';
+var colors1 = chroma.scale([cream, cream, '#f183a6', pink]);
+var colors2 = chroma.scale([cream, cream, '#e3acd2', purple]);
     // .range(['#f5d5ca', '#e7b7ce', '#da99d3', , '#a2094a']);
 
 class App extends Component {
@@ -106,9 +111,10 @@ class App extends Component {
 
   render() {
     var props = {
-      colors,
+      colors1,
+      colors2,
       colorScale,
-      gray: '#665059',
+      cream, pink, purple, gray,
       dates,
       gifs,
       gifsNested,

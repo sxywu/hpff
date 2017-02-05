@@ -69,7 +69,7 @@ class Timeline extends Component {
       .attr('y', d => yScale(d.length))
       .attr('width', dotSize)
       .attr('height', d => height - margin.top - yScale(d.length))
-      .attr('fill', d => props.colors(props.colorScale(d.max)));
+      .attr('fill', d => props.colors1(props.colorScale(d.max)));
   }
 
   renderLines(props) {

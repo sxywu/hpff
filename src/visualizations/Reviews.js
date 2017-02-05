@@ -103,7 +103,7 @@ class Timeline extends Component {
       .map(stories => {
         return _.map(stories, (d, i) => {
           var size = sizeScale(d.length);
-          var color = props.colors(props.colorScale(d.max.reviews.text));
+          var color = props.colors1(props.colorScale(d.max.reviews.text));
           return {
             x: xScale(d.month) + dotSize / 2,
             y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
