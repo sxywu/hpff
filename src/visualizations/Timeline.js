@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 16 * 12 * dotSize + 2 * margin.left;
-var height = 300;
+var height = 200;
 
 var numTicks = 32;
 var xScale = d3.scaleTime()
@@ -19,6 +19,11 @@ var xAxis = d3.axisBottom()
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .tickSizeOuter(0)
   .scale(xScale);
+var area = d3.area()
+  .x(d => xScale(d.date))
+  .y1(d => yScale(d.length))
+  .y0(yScale(0))
+  // .curve(d3.curveCatmullRom.alpha(0.5));
 
 class Timeline extends Component {
 
@@ -29,12 +34,15 @@ class Timeline extends Component {
       .call(xAxis);
     this.histogram = this.container.append('g')
       // .attr('fill-opacity', 0.5);
+    this.lines = this.container.append('g');
 
-    this.renderHistogram(this.props);
+    // this.renderHistogram(this.props);
+    this.renderLines(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
-    this.renderHistogram(nextProps);
+    // this.renderHistogram(nextProps);
+    this.renderLines(nextProps);
 
     return false;
   }
@@ -62,6 +70,33 @@ class Timeline extends Component {
       .attr('width', dotSize)
       .attr('height', d => height - margin.top - yScale(d.length))
       .attr('fill', d => props.colors(props.colorScale(d.max)));
+  }
+
+  renderLines(props) {
+    var yMax = _.chain(props.pairings)
+      .map(months => _.map(months, stories => stories.length))
+      .flatten().max().value()
+    yScale.domain([0, yMax]).nice();
+
+    var data = _.map(props.pairings, months => {
+      return _.chain(months)
+        .sortBy(d => d[0].publishGroup)
+        .map(stories => {
+          return {
+            length: stories.length,
+            date: stories[0].publishGroup,
+          }
+        }).value();
+    });
+
+    var lines = this.lines.selectAll('.line').data(data);
+    lines.exit().remove();
+
+    lines.enter().append('path')
+      .classed('line', true)
+      .attr('d', area)
+      .attr('fill', props.pink)
+      .attr('fill-opacity', 0.25);
   }
 
   render() {

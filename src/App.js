@@ -114,17 +114,15 @@ class App extends Component {
       gifsNested,
     };
 
-    //
+    var pairings = _.filter(this.state.pairings, (dots, pairing) =>
+      _.includes(pairing, this.state.selected));
     // get pairings for selected character
-    var reviews = _.chain(this.state.pairings)
-      .filter((dots, pairing) => _.includes(pairing, this.state.selected))
-      .map(dots => <Reviews {...props} dots={dots} />)
-      .value();
+    var reviews = _.map(pairings, dots => <Reviews {...props} dots={dots} />);
 
     return (
       <div className="App">
         <h3>{this.state.pairing}</h3>
-        <Timeline {...props} {...this.state} />
+        <Timeline {...props} {...this.state} pairings={pairings} />
         {reviews}
       </div>
     );
