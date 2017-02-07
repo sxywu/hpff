@@ -9,6 +9,7 @@ import Reviews from './visualizations/Reviews';
 import Graph from './visualizations/Graph';
 
 import dates from './data/dates.json';
+import annotations from './data/annotations.json';
 import allGifs from './data/gifs.json';
 var gifs = _.map(allGifs.all, file =>
   [file.replace('.gif', ''), require('./images/gifs/' + file)]);
@@ -99,12 +100,9 @@ class App extends Component {
     var pairings = {};
     var genres = {}
     _.each(data, d => {
-      if (!d.pairings.length) {
-        return this.getPairingsAndMetadata(pairings, genres, d, 'No Pairing');
-      }
-      // _.each(d.pairings, pairing => {
-        this.getPairingsAndMetadata(pairings, genres, d, d.pairings[0]);
-      // });
+      // only remember pairings we have in our graph/annotations
+      if (!annotations[d.pairings[0]]) return;
+      this.getPairingsAndMetadata(pairings, genres, d, d.pairings[0]);
     });
 
     this.setState({stories, data, pairings, genres});
@@ -119,8 +117,10 @@ class App extends Component {
       dates,
       gifs,
       gifsNested,
+      annotations,
     };
 
+    console.log(this.state.pairings)
     var pairings = _.filter(this.state.pairings, (dots, pairing) =>
       _.includes(pairing, this.state.selected));
     // get pairings for selected character

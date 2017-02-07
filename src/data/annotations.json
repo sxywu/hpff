@@ -1,0 +1,74 @@
+{
+  "James/Lily": {
+    "canon": true
+  },
+  "Harry/Hermione": {
+    "canon": false
+  },
+  "Draco/Hermione": {
+    "canon": false
+  },
+  "Draco/Ginny": {
+    "canon": false
+  },
+  "Harry/Ginny": {
+    "canon": true
+  },
+  "Ron/Hermione": {
+    "canon": true
+  },
+  "Harry/Luna": {
+    "canon": false
+  },
+  "Harry/Cho": {
+    "canon": true
+  },
+  "Ginny/Dean": {
+    "canon": true
+  },
+  "Remus/Tonks": {
+    "canon": true
+  },
+  "Draco/Pansy": {
+    "canon": false
+  },
+  "Ron/Luna": {
+    "canon": false
+  },
+  "Snape/Lily": {
+    "canon": false
+  },
+  "Ron/Lavender": {
+    "canon": true
+  },
+  "Remus/Lily": {
+    "canon": false
+  },
+  "Draco/Luna": {
+    "canon": false
+  },
+  "Sirius/Lily": {
+    "canon": false
+  },
+  "Hermione/FredOrGeorge": {
+    "canon": false
+  },
+  "Hermione/Krum": {
+    "canon": true
+  },
+  "Rose/Scorpius": {
+    "canon": false
+  },
+  "Dean/Luna": {
+    "canon": false
+  },
+  "Remus/Sirius": {
+    "canon": false
+  },
+  "Ginny/Hermione": {
+    "canon": false
+  },
+  "Draco/Harry": {
+    "canon": false
+  }
+}
