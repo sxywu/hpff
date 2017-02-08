@@ -16,7 +16,7 @@ var nodes = _.map(positions, node => {
 });
 var links = [];
 
-var linkScale = d3.scaleLinear().range([1, 10]);
+var linkScale = d3.scaleLinear().range([2, 8]);
 
 class Graph extends Component {
 
@@ -78,26 +78,20 @@ class Graph extends Component {
       .enter().insert('path', '.node')
       .classed('link', true)
       .attr('fill', 'none')
-      .attr('stroke', props.pink)
+      .attr('stroke', d => props.annotations[d.id].canon ? props.pink : props.purple)
       .attr('stroke-width', d => d.size)
       .attr('opacity', 0.5)
       .attr('d', this.calculateLinkPath);
 
   }
 
-  calculateLinkPath(link) {
-    var x1 = link.source.x;
-    var y1 = link.source.y;
-    var x2 = link.target.x;
-    var y2 = link.target.y;
-
-    // if it's on same level, then curve if not straight line
-    var curve = (y1 === y2) ? (x2 - x1) / 4 : 0;
-    var cx1 = x1 + curve;
-    var cy1 = y1 + curve;
-    var cx2 = x2 - curve;
-    var cy2 = y1 + curve;
-    return 'M' + [x1, y1] + ' C' + [cx1, cy1] + ' ' + [cx2, cy2] + ' ' + [x2, y2];
+  // modified from http://bl.ocks.org/mbostock/1153292
+  calculateLinkPath(d) {
+    var dx = d.target.x - d.source.x,
+        dy = d.target.y - d.source.y,
+        dr = (Math.sqrt(dx * dx + dy * dy) * 2) / 2;
+    return "M" + d.source.x + "," + d.source.y +
+      "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
   }
 
   render() {
