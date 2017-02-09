@@ -29,6 +29,7 @@ class Graph extends Component {
   shouldComponentUpdate(nextProps) {
     this.calculateGraph(nextProps);
     this.renderGraph(nextProps);
+    this.updateGraph(nextProps);
 
     return false;
   }
@@ -84,6 +85,14 @@ class Graph extends Component {
       .attr('opacity', 0.5)
       .attr('d', this.calculateLinkPath);
 
+    this.circles = this.container.selectAll('.node');
+    this.links = this.container.selectAll('.link');
+  }
+
+  updateGraph(props) {
+    this.circles.select('image')
+      .attr('opacity', d => !props.selected || d.name === props.selected ? 1 : 0.2);
+    this.links.attr('opacity', d => _.includes(d.id, props.selected) ? 0.75 : 0.2);
   }
 
   // modified from http://bl.ocks.org/mbostock/1153292
