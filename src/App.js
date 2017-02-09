@@ -120,9 +120,9 @@ class App extends Component {
       annotations,
     };
 
-    console.log(this.state.pairings)
-    var pairings = _.filter(this.state.pairings, (dots, pairing) =>
-      _.includes(pairing, this.state.selected));
+    var pairings = _.chain(this.state.pairings)
+      .filter((dots, pairing) => _.includes(pairing, this.state.selected))
+      .sortBy(dots => -1 * _.sumBy(_.values(dots), d => d.length)).value();
     // get pairings for selected character
     var reviews = _.map(pairings, dots => <Reviews {...props} dots={dots} />);
 
