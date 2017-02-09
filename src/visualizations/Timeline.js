@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 16 * 12 * dotSize + 2 * margin.left;
-var height = 200;
+var height = 300;
 
 var numTicks = 32;
 var xScale = d3.scaleTime()
@@ -19,10 +19,14 @@ var xAxis = d3.axisBottom()
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .tickSizeOuter(0)
   .scale(xScale);
+var line = d3.line()
+  .x(d => xScale(d.date))
+  .y(d => yScale(d.top))
+  .curve(d3.curveCatmullRom);
 var area = d3.area()
   .x(d => xScale(d.date))
-  .y1(d => yScale(d.length))
-  .y0(yScale(0))
+  .y0(d => yScale(d.bottom))
+  .y1(d => yScale(d.top))
   .curve(d3.curveCatmullRom);
 
 class Timeline extends Component {
@@ -38,40 +42,68 @@ class Timeline extends Component {
     this.annotations = this.container.append('g');
 
     this.renderDates();
+    this.calculateLines(this.props);
     this.renderLines(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
+    this.calculateLines(nextProps);
     this.renderLines(nextProps);
 
     return false;
   }
 
-  renderLines(props) {
-    var yMax = _.chain(props.pairings)
-      .map(months => _.map(months, stories => stories.length))
-      .flatten().max().value()
-    yScale.domain([0, yMax]).nice();
-
-    var data = _.map(props.pairings, months => {
+  calculateLines(props) {
+    // props.pairings is an array of the pairings, with the values being
+    // objects keyed by months and valued by stories
+    var monthYs = {};
+    var yMax = 0;
+    this.months = _.map(props.pairings, months => {
       return _.chain(months)
         .sortBy(d => d[0].publishGroup)
-        .map(stories => {
+        .map((stories) => {
+          var date = stories[0].publishGroup;
+          var bottom = monthYs[date] || 0;
+          var top = bottom + stories.length;
+          monthYs[date] = top;
+
+          yMax = Math.max(yMax, top);
+
           return {
+            date,
             length: stories.length,
-            date: stories[0].publishGroup,
+            bottom,
+            top,
+            pairing: stories[0].pairings[0],
           }
         }).value();
     });
 
-    var lines = this.lines.selectAll('.line').data(data);
-    lines.exit().remove();
+    yScale.domain([0, yMax]).nice();
+  }
 
-    lines.enter().append('path')
-      .classed('line', true)
-      .attr('d', area)
-      .attr('fill', props.pink)
+  renderLines(props) {
+    var pairings = this.lines.selectAll('.pairing')
+      .data(this.months);
+    pairings.exit().remove();
+
+    var enter = pairings.enter().append('g')
+      .classed('pairing', true);
+    enter.append('path')
+      .classed('line', true);
+    enter.append('path')
+      .classed('area', true)
       .attr('fill-opacity', 0.25);
+
+    pairings = enter.merge(pairings);
+
+    pairings.select('.line')
+      .attr('d', line)
+      .attr('fill', 'none')
+      .attr('stroke', d => props.annotations[d[0].pairing].canon ? props.pink : props.purple);
+    pairings.select('.area')
+      .attr('d', area)
+      .attr('fill', d => props.annotations[d[0].pairing].canon ? props.pink : props.purple);
   }
 
 
