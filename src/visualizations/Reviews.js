@@ -19,7 +19,7 @@ var xAxis = d3.axisBottom()
   .tickSizeOuter(0)
   .scale(xScale);
 var sizeScale = d3.scaleLinear()
-  .domain([1, 5]).range([2, 4]);
+  .domain([1, 5]).range([3, 4.5]);
 
 class Timeline extends Component {
 
@@ -87,7 +87,7 @@ class Timeline extends Component {
             return Math.floor(i / 5);
           }).map((stories, i) => {
             return {
-              pairing: stories[0].pairing,
+              pairing: stories[0].pairings[0],
               extent: d3.extent(stories, story => story.published),
               month: stories[0].publishGroup,
               max: _.maxBy(stories, story => story.reviews.text),
@@ -102,7 +102,8 @@ class Timeline extends Component {
       .map(stories => {
         return _.map(stories, (d, i) => {
           var size = sizeScale(d.length);
-          var color = props.colors1(props.colorScale(d.max.reviews.text));
+          var color = props.annotations[d.pairing].canon ? props.colors1 : props.colors2;
+          color = color(props.colorScale(d.max.reviews.text));
           return {
             x: xScale(d.month) + dotSize / 2,
             y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
