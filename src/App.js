@@ -125,6 +125,7 @@ class App extends Component {
       gifsNested,
       annotations,
       selectCharacter: this.selectCharacter,
+      transition: d3.transition().duration(1000),
     };
 
     var pairings = _.chain(this.state.pairings)

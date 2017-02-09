@@ -44,11 +44,13 @@ class Timeline extends Component {
     this.renderDates();
     this.calculateLines(this.props);
     this.renderLines(this.props);
+    this.renderLegend(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
     this.calculateLines(nextProps);
     this.renderLines(nextProps);
+    this.renderLegend(nextProps);
 
     return false;
   }
@@ -90,7 +92,7 @@ class Timeline extends Component {
     enter.append('path')
       .classed('line', true)
       .attr('fill', 'none')
-      .attr('stroke-opacity', opacity)
+      .attr('stroke-opacity', 0)
       .attr('stroke-width', 2);
     enter.append('path')
       .classed('area', true)
@@ -98,16 +100,16 @@ class Timeline extends Component {
 
     pairings = enter.merge(pairings);
 
-    var t = d3.transition().duration(500);
     pairings.select('.line')
       .attr('stroke', d => props.annotations[d.pairing].canon ?
         props.colors1(opacity) : props.colors2(opacity))
-      .transition(t)
+      .transition(props.transition)
+      .attr('stroke-opacity', 1)
       .attr('d', d => line(d.data));
     pairings.select('.area')
       .attr('fill', d => props.annotations[d.pairing].canon ?
         props.colors1(opacity) : props.colors2(opacity))
-      .transition(t)
+      .transition(props.transition)
       .attr('d', d => area(d.data));
   }
 
@@ -115,7 +117,7 @@ class Timeline extends Component {
   renderDates() {
     var fontSize = 10;
     var y = height * 0.1;
-    var dates = this.annotations.selectAll('date')
+    var dates = this.annotations.selectAll('.date')
       .data(this.props.dates).enter().append('g')
       .classed('date', true)
       .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
@@ -144,6 +146,44 @@ class Timeline extends Component {
       .text(d => d[0]);
   }
 
+  renderLegend(props) {
+    var data = _.map(props.pairings, months => {
+      var pairing = _.values(months)[0][0].pairings[0];
+      var character = pairing.replace(props.selected, '').replace('/', '');
+      var length = _.reduce(months, (sum, stories) => sum + stories.length, 0);
+      var color = props.annotations[pairing].canon ? props.pink : props.purple;
+      return {pairing, character, length, color};
+    });
+    var pairings = this.annotations.selectAll('.pairing')
+      .data(data, d => d.character);
+
+    pairings.exit().remove();
+
+    var fontSize = 14;
+    var enter = pairings.enter().append('g')
+      .classed('pairing', true)
+      .attr('opacity', 0)
+      .attr('transform', (d, i) => 'translate(' + [width * 0.75, height * 0.5 - 1.5 * i * fontSize] + ')');
+
+    enter.append('line')
+      .attr('stroke-width', 2)
+      .attr('x2', fontSize);
+
+    enter.append('text')
+      .attr('font-size', fontSize - 2)
+      .attr('x', fontSize + 2)
+      .attr('text-anchor', 'start')
+      .attr('dy', '.35em');
+
+    pairings = enter.merge(pairings)
+      .transition(props.transition)
+      .attr('opacity', 1)
+      .attr('transform', (d, i) => 'translate(' + [width * 0.75, height * 0.5 - 1.5 * i * fontSize] + ')');
+    pairings.select('line')
+      .attr('stroke', d => d.color)
+    pairings.select('text')
+      .text(d => d.character + ' (' + d3.format(',')(d.length) + ' stories)');
+  }
 
   render() {
     return (
