@@ -5,12 +5,12 @@ import * as d3 from 'd3';
 
 var dotSize = 5;
 var margin = {top: 20, left: 20};
-var width = 16 * 12 * dotSize + 2 * margin.left;
+var width = 14.5 * 12 * dotSize + 2 * margin.left;
 var height = 300;
 
-var numTicks = 32;
+var numTicks = 30;
 var xScale = d3.scaleTime()
-  .domain([new Date('2/1/2001'), new Date('12/31/2016')])
+  .domain([new Date('6/1/2002'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var yScale = d3.scaleLinear()
   .range([height - margin.top, 2 * margin.top]);
@@ -80,8 +80,6 @@ class Timeline extends Component {
       yMax = Math.max(yMax, bottom);
     });
 
-    console.log(yMax, this.months)
-
     yScale.domain([0, yMax]).nice();
   }
 
@@ -145,6 +143,7 @@ class Timeline extends Component {
       .attr('font-weight', 600)
       .text(d => d[0]);
   }
+
 
   render() {
     return (

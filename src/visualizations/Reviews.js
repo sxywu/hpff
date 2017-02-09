@@ -6,15 +6,15 @@ import * as d3 from 'd3';
 var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
-var width = 16 * 12 * dotSize + 2 * margin.left;
+var width = 14.5 * 12 * dotSize + 2 * margin.left;
 var height = 320;
 var sf = 2;
 
 var xScale = d3.scaleTime()
-  .domain([new Date('2/1/2001'), new Date('12/31/2016')])
+  .domain([new Date('6/1/2002'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var xAxis = d3.axisBottom()
-  .ticks(32)
+  .ticks(30)
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .tickSizeOuter(0)
   .scale(xScale);
