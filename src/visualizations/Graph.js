@@ -123,8 +123,14 @@ class Graph extends Component {
   }
 
   render() {
+    var style = {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+    };
+
     return (
-      <svg ref='container' width={width} height={height} />
+      <svg ref='container' style={style} width={width} height={height} />
     );
   }
 }
