@@ -64,6 +64,22 @@ class Graph extends Component {
       .style('cursor', 'pointer')
       .on('click', d => props.selectCharacter(d));
 
+    var fontSize = 12;
+    this.circles.append('rect')
+      .attr('x', d => -d.name.length * (fontSize / 2) / 2)
+      .attr('y', radius / 2)
+      .attr('rx', 3).attr('ry', 3)
+      .attr('width', d => d.name.length * (fontSize / 2))
+      .attr('height', fontSize)
+      .attr('fill', '#fff')
+      .attr('fill-opacity', 0.75);
+    this.circles.append('text')
+      .attr('y', radius / 2 + fontSize / 2)
+      .attr('dy', '.35em')
+      .attr('text-anchor', 'middle')
+      .style('font-size', fontSize - 2)
+      .text(d => d.name);
+
     this.circles.append('circle')
       .attr('r', radius / 2)
       .attr('fill', '#fff');
@@ -90,6 +106,8 @@ class Graph extends Component {
   }
 
   updateGraph(props) {
+    this.circles.select('text')
+      .attr('opacity', d => !props.selected || d.name === props.selected ? 1 : 0.25);
     this.circles.select('image')
       .attr('opacity', d => !props.selected || d.name === props.selected ? 1 : 0.2);
     this.links.attr('opacity', d => _.includes(d.id, props.selected) ? 0.75 : 0.2);
