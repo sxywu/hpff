@@ -77,7 +77,7 @@ class Timeline extends Component {
         });
 
         bottom = top;
-      });
+      })
     });
   }
 
@@ -96,7 +96,7 @@ class Timeline extends Component {
       .attr('stroke-width', 2);
     enter.append('path')
       .classed('area', true)
-      .attr('fill-opacity', 0.05);
+      .attr('fill-opacity', 0);
 
     pairings = enter.merge(pairings);
 
@@ -110,13 +110,14 @@ class Timeline extends Component {
       .attr('fill', d => props.annotations[d.pairing].canon ?
         props.colors1(opacity) : props.colors2(opacity))
       .transition(props.transition)
-      .attr('d', d => area(d.data));
+      .attr('d', d => area(d.data))
+      .attr('fill-opacity', 0.05);
   }
 
 
   renderDates() {
     var fontSize = 10;
-    var y = height * 0.1;
+    var y = height * 0.6;
     var dates = this.annotations.selectAll('.date')
       .data(this.props.dates).enter().append('g')
       .classed('date', true)
