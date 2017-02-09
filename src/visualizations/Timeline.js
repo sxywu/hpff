@@ -13,7 +13,7 @@ var xScale = d3.scaleTime()
   .domain([new Date('2/1/2001'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var yScale = d3.scaleLinear()
-  .range([height - margin.top, margin.top]);
+  .range([height - margin.top, 2 * margin.top]);
 var xAxis = d3.axisBottom()
   .ticks(numTicks)
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
@@ -54,30 +54,33 @@ class Timeline extends Component {
   }
 
   calculateLines(props) {
-    // props.pairings is an array of the pairings, with the values being
-    // objects keyed by months and valued by stories
-    var monthYs = {};
-    var yMax = 0;
     this.months = _.map(props.pairings, months => {
-      return _.chain(months)
-        .sortBy(d => d[0].publishGroup)
-        .map((stories) => {
-          var date = stories[0].publishGroup;
-          var bottom = monthYs[date] || 0;
-          var top = bottom + stories.length;
-          monthYs[date] = top;
-
-          yMax = Math.max(yMax, top);
-
-          return {
-            date,
-            length: stories.length,
-            bottom,
-            top,
-            pairing: stories[0].pairings[0],
-          }
-        }).value();
+      return {
+        pairing: _.values(months)[0][0].pairings[0],
+        data: [],
+      }
     });
+    var [start, end] = xScale.domain();
+    var yMax = 0;
+    _.each(d3.timeMonth.range(start, end), date => {
+      var bottom = 0;
+      _.each(props.pairings, (months, i) => {
+        var stories = months[date] || [];
+        var top = bottom + stories.length + 2;
+
+        this.months[i].data.push({
+          date,
+          length: stories.length,
+          bottom,
+          top,
+        });
+
+        bottom = top;
+      });
+      yMax = Math.max(yMax, bottom);
+    });
+
+    console.log(yMax, this.months)
 
     yScale.domain([0, yMax]).nice();
   }
@@ -90,26 +93,30 @@ class Timeline extends Component {
     var enter = pairings.enter().append('g')
       .classed('pairing', true);
     enter.append('path')
-      .classed('line', true);
+      .classed('line', true)
+      .attr('fill', 'none')
+      .attr('stroke-width', 2);
     enter.append('path')
       .classed('area', true)
-      .attr('fill-opacity', 0.25);
+      .attr('fill-opacity', 0.15);
 
     pairings = enter.merge(pairings);
 
+    var opacity = 0.85;
     pairings.select('.line')
-      .attr('d', line)
-      .attr('fill', 'none')
-      .attr('stroke', d => props.annotations[d[0].pairing].canon ? props.pink : props.purple);
+      .attr('d', d => line(d.data))
+      .attr('stroke', d => props.annotations[d.pairing].canon ?
+        props.colors1(opacity) : props.colors2(opacity));
     pairings.select('.area')
-      .attr('d', area)
-      .attr('fill', d => props.annotations[d[0].pairing].canon ? props.pink : props.purple);
+      .attr('d', d => area(d.data))
+      .attr('fill', d => props.annotations[d.pairing].canon ?
+        props.colors1(opacity) : props.colors2(opacity));
   }
 
 
   renderDates() {
     var fontSize = 10;
-    var y = height * 0.15;
+    var y = height * 0.1;
     var dates = this.annotations.selectAll('date')
       .data(this.props.dates).enter().append('g')
       .classed('date', true)
