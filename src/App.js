@@ -35,6 +35,8 @@ class App extends Component {
       genres: {},
       selected: 'Hermione',
     };
+    // https://daveceddia.com/avoid-bind-when-passing-props/, way #5
+    this.selectCharacter = this.selectCharacter.bind(this);
   }
 
   componentWillMount() {
@@ -108,6 +110,10 @@ class App extends Component {
     this.setState({stories, data, pairings, genres});
   }
 
+  selectCharacter(node) {
+    this.setState({selected: node.name});
+  }
+
   render() {
     var props = {
       colors1,
@@ -118,6 +124,7 @@ class App extends Component {
       gifs,
       gifsNested,
       annotations,
+      selectCharacter: this.selectCharacter,
     };
 
     var pairings = _.chain(this.state.pairings)

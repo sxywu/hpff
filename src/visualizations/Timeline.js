@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 14.5 * 12 * dotSize + 2 * margin.left;
-var height = 300;
+var height = 360;
 
 var numTicks = 30;
 var xScale = d3.scaleTime()
@@ -21,12 +21,12 @@ var xAxis = d3.axisBottom()
   .scale(xScale);
 var line = d3.line()
   .x(d => xScale(d.date))
-  .y(d => yScale(d.top))
+  .y(d => height - margin.top - d.top * dotSize - 2)
   .curve(d3.curveCatmullRom);
 var area = d3.area()
   .x(d => xScale(d.date))
-  .y0(d => yScale(d.bottom))
-  .y1(d => yScale(d.top))
+  .y0(d => height - margin.top - d.bottom * dotSize - 2)
+  .y1(d => height - margin.top -  d.top * dotSize)
   .curve(d3.curveCatmullRom);
 
 class Timeline extends Component {
@@ -61,12 +61,11 @@ class Timeline extends Component {
       }
     });
     var [start, end] = xScale.domain();
-    var yMax = 0;
     _.each(d3.timeMonth.range(start, end), date => {
       var bottom = 0;
       _.each(props.pairings, (months, i) => {
         var stories = months[date] || [];
-        var top = bottom + stories.length + 2;
+        var top = bottom + stories.length / 5;
 
         this.months[i].data.push({
           date,
@@ -77,10 +76,7 @@ class Timeline extends Component {
 
         bottom = top;
       });
-      yMax = Math.max(yMax, bottom);
     });
-
-    yScale.domain([0, yMax]).nice();
   }
 
   renderLines(props) {
@@ -88,27 +84,31 @@ class Timeline extends Component {
       .data(this.months);
     pairings.exit().remove();
 
+    var opacity = 0.85;
     var enter = pairings.enter().append('g')
       .classed('pairing', true);
     enter.append('path')
       .classed('line', true)
       .attr('fill', 'none')
+      .attr('stroke-opacity', opacity)
       .attr('stroke-width', 2);
     enter.append('path')
       .classed('area', true)
-      .attr('fill-opacity', 0.15);
+      .attr('fill-opacity', 0.05);
 
     pairings = enter.merge(pairings);
 
-    var opacity = 0.85;
+    var t = d3.transition().duration(500);
     pairings.select('.line')
-      .attr('d', d => line(d.data))
       .attr('stroke', d => props.annotations[d.pairing].canon ?
-        props.colors1(opacity) : props.colors2(opacity));
+        props.colors1(opacity) : props.colors2(opacity))
+      .transition(t)
+      .attr('d', d => line(d.data));
     pairings.select('.area')
-      .attr('d', d => area(d.data))
       .attr('fill', d => props.annotations[d.pairing].canon ?
-        props.colors1(opacity) : props.colors2(opacity));
+        props.colors1(opacity) : props.colors2(opacity))
+      .transition(t)
+      .attr('d', d => area(d.data));
   }
 
 

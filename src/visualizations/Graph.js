@@ -59,7 +59,9 @@ class Graph extends Component {
       .data(nodes, d => d.name)
       .enter().append('g')
       .classed('node', true)
-      .attr('transform', d => 'translate(' + [d.x, d.y] + ')');
+      .attr('transform', d => 'translate(' + [d.x, d.y] + ')')
+      .style('cursor', 'pointer')
+      .on('click', d => props.selectCharacter(d));
 
     this.circles.append('circle')
       .attr('r', radius / 2)
@@ -71,7 +73,6 @@ class Graph extends Component {
       .attr('y', -radius / 2)
       .attr('width', radius)
       .attr('height', radius);
-
 
     this.links = this.container.selectAll('.link')
       .data(links, d => d.id)
