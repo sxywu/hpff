@@ -7,11 +7,11 @@ var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 14.5 * 12 * dotSize + 2 * margin.left;
-var height = 320;
+var height = 280;
 var sf = 2;
 
 var xScale = d3.scaleTime()
-  .domain([new Date('6/1/2002'), new Date('12/31/2016')])
+  .domain([new Date('2/1/2001'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var xAxis = d3.axisBottom()
   .ticks(30)
@@ -35,6 +35,7 @@ class Timeline extends Component {
 
     this.annotations = this.svg.append('g')
       .attr('transform', 'translate(' + [0, margin.top] + ')');
+    this.renderDates();
     this.renderGifs(this.props);
 
     // axis
@@ -146,11 +147,6 @@ class Timeline extends Component {
     var enter = images.enter().append('g')
       .classed('gif', true);
 
-    enter.append('line')
-      .attr('stroke', this.props.gray)
-      // .attr('stroke-dasharray', '5 5')
-      .attr('opacity', 0.5);
-
     enter.append('circle')
       .attr('r', gifSize);
 
@@ -160,11 +156,22 @@ class Timeline extends Component {
         return 'translate(' + [xScale(d.date), d.y] + ')'
       });
 
-    images.select('line')
-      .attr('y2', d => height - 2 * margin.top - d.y);
-
     images.select('circle')
       .style('fill', d => 'url(#gif-' + d.image + ')');
+  }
+
+  renderDates() {
+    var y = 0;
+    var dates = this.annotations.selectAll('.date')
+      .data(this.props.dates).enter().append('g')
+      .classed('date', true)
+      .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
+
+    dates.append('line')
+      .attr('y2', height - 2 * margin.top - y)
+      .attr('stroke', this.props.gray)
+      .attr('stroke-dasharray', d => d[3] === 'film' ? 'none' : '5 5')
+      .attr('opacity', 0.2);
   }
 
   render() {
