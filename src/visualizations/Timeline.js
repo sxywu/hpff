@@ -166,13 +166,13 @@ class Timeline extends Component {
       .attr('y1', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
       .attr('y2', height - margin.top - y)
       .attr('stroke', this.props.gray)
-      // .attr('stroke-dasharray', d => d[3] === 'book' ? 'none' : '5 5')
+      .attr('stroke-dasharray', d => d[3] === 'book' ? '5 5' : 'none')
       .attr('opacity', 0.5);
 
     dates.append('circle')
       .attr('cy', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
       .attr('r', (fontSize + 2) / 2)
-      .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
+      .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
       .attr('stroke', this.props.gray)
       .attr('stroke-width', 2);
 
@@ -180,7 +180,7 @@ class Timeline extends Component {
       .attr('y', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
       .attr('dy', '.35em')
       .attr('text-anchor', 'middle')
-      .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
+      .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
       .attr('font-size', fontSize)
       .attr('font-weight', 600)
       .text(d => d[0]);
