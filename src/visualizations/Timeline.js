@@ -15,7 +15,8 @@ var xScale = d3.scaleTime()
   .domain([new Date('6/1/2002'), new Date('12/31/2016')])
   .range([margin.left, width - margin.left]);
 var yScale = d3.scaleLinear()
-  .range([height - margin.top, 2 * margin.top]);
+  .range([height - margin.top, 2 * margin.top])
+  .clamp(true);
 var xAxis = d3.axisBottom()
   .ticks(numTicks)
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
@@ -37,25 +38,18 @@ class Timeline extends Component {
 
     this.state = {
       selected: null,
-      hovered: null,
     };
+    this.selectPairing = this.selectPairing.bind(this);
+    this.hoverLine = this.hoverLine.bind(this);
   }
 
   componentDidMount() {
-    this.selectPairing = this.selectPairing.bind(this);
-
     this.container = d3.select(this.refs.container);
     this.container.append('g')
       .attr('transform', 'translate(' + [0, height - margin.top] + ')')
       .call(xAxis);
     this.lines = this.container.append('g');
     this.annotations = this.container.append('g');
-    // this.hover = this.container.append('rect')
-    //   .attr('width', width - 2 * margin.left)
-    //   .attr('height', height - 2 * margin.top)
-    //   .attr('x', margin.left).attr('y', margin.top)
-    //   .attr('fill', 'none')
-    //   .on('mousemove', () =>{ debugger});
     this.legend = this.container.append('g');
     this.title = this.legend.append('text')
       .attr('font-size', fontSize - 2)
@@ -73,7 +67,7 @@ class Timeline extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // if it's a different character all together, reset state
     if (nextProps.selected !== this.props.selected) {
-      nextState = Object.assign({}, this.state, {selected: null});
+      nextState = {selected: null};
       this.setState(nextState);
     }
     this.calculateLines(nextProps);
@@ -84,10 +78,15 @@ class Timeline extends Component {
   }
 
   calculateLines(props) {
+    var opacity = 0.85;
     this.months = _.map(props.pairings, months => {
+      var pairing = _.values(months)[0][0].pairings[0];
       return {
-        pairing: _.values(months)[0][0].pairings[0],
+        pairing,
         data: [],
+        key: {},
+        fill: props.annotations[pairing].canon ?
+          props.colors1(opacity) : props.colors2(opacity),
       }
     });
     var [start, end] = xScale.domain();
@@ -97,12 +96,13 @@ class Timeline extends Component {
         var stories = months[date] || [];
         var top = bottom + stories.length / 5;
 
-        this.months[i].data.push({
+        var index = this.months[i].data.push({
           date,
           length: stories.length,
           bottom,
           top,
         });
+        this.months[i].key[date] = index;
 
         bottom = top;
       })
@@ -114,7 +114,6 @@ class Timeline extends Component {
       .data(this.months);
     pairings.exit().remove();
 
-    var opacity = 0.85;
     var enter = pairings.enter().append('g')
       .classed('pairing', true);
     enter.append('path')
@@ -127,20 +126,31 @@ class Timeline extends Component {
       .attr('fill-opacity', 0);
 
     pairings = enter.merge(pairings)
-      .attr('opacity', d => !state.selected || d.pairing === state.selected ? 1 : 0.25);
+      .attr('opacity', d => !state.selected || d.pairing === state.selected ? 1 : 0.25)
+      .on('mousemove', this.hoverLine)
+      .on('mouseleave', d => this.hoverLine());
 
     pairings.select('.line')
-      .attr('stroke', d => props.annotations[d.pairing].canon ?
-        props.colors1(opacity) : props.colors2(opacity))
+      .attr('stroke', d => d.fill)
       .transition(props.transition)
-      .attr('stroke-opacity', 1)
+      .attr('stroke-opacity', .75)
       .attr('d', d => line(d.data));
     pairings.select('.area')
-      .attr('fill', d => props.annotations[d.pairing].canon ?
-        props.colors1(opacity) : props.colors2(opacity))
+      .attr('fill', d => d.fill)
       .transition(props.transition)
       .attr('d', d => area(d.data))
       .attr('fill-opacity', d => state.selected && d.pairing === state.selected ? 0.75 : 0.1);
+
+    this.dots = this.lines.selectAll('.dot')
+      .data(this.months, d => d.pairing);
+    this.dots.exit().remove();
+
+    this.dots = this.dots.enter().append('circle')
+      .classed('dot', true)
+      .merge(this.dots)
+      .attr('fill', d => d.fill)
+      .attr('r', dotSize * .75)
+      .style('display', 'none')
   }
 
 
@@ -182,7 +192,7 @@ class Timeline extends Component {
       var character = pairing.replace(props.selected, '').replace('/', '');
       var length = _.reduce(months, (sum, stories) => sum + stories.length, 0);
       var color = props.annotations[pairing].canon ? props.pink : props.purple;
-      return {pairing, character, length, color};
+      return {pairing, character, length, color, months};
     });
     var pairings = this.legend.selectAll('.pairing')
       .data(data, d => d.character);
@@ -208,7 +218,7 @@ class Timeline extends Component {
 
     pairings = enter.merge(pairings)
       .transition(props.transition)
-      .attr('opacity', 1)
+      .attr('opacity', d => !state.selected || d.pairing === state.selected ? 1 : 0.25)
       .attr('transform', (d, i) => 'translate(' + [width * 0.75, height * 0.5 - 1.5 * i * fontSize] + ')');
     pairings.select('line')
       .attr('stroke', d => d.color)
@@ -224,6 +234,25 @@ class Timeline extends Component {
   selectPairing(d) {
     var selected = this.state.selected && this.state.selected === d.pairing ? null : d.pairing;
     this.setState({selected});
+  }
+
+  hoverLine(line) {
+    var [x, y] = d3.mouse(this.refs.container);
+    var date = d3.timeMonth.floor(xScale.invert(x));
+
+    var subtitle = line ? d3.timeFormat('%B %d, %Y')(date) : 'Total stories';
+    this.title.text(this.props.selected + ' (' + subtitle + ')');
+    this.legend.selectAll('.pairing').select('text')
+      .text(d => {
+        var length = line ? (d.months[date] ? d.months[date].length : 0) : d.length;
+        return d.character + ' (' + d3.format(',')(length) + ' stories)';
+      });
+
+    this.dots
+      .style('display', line ? 'block' : 'none')
+      .attr('opacity', d => !this.state.selected || d.pairing === this.state.selected ? 1 : 0.25)
+      .attr('cx', xScale(date) + dotSize)
+      .attr('cy', d => height - margin.top - d.data[d.key[date]].top * dotSize - 2)
   }
 
   render() {
