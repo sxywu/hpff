@@ -32,17 +32,32 @@ var area = d3.area()
   .curve(d3.curveCatmullRom);
 
 class Timeline extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selected: null,
+      hovered: null,
+    };
+  }
 
   componentDidMount() {
+    this.selectPairing = this.selectPairing.bind(this);
+
     this.container = d3.select(this.refs.container);
     this.container.append('g')
       .attr('transform', 'translate(' + [0, height - margin.top] + ')')
       .call(xAxis);
-    this.histogram = this.container.append('g')
-      // .attr('fill-opacity', 0.5);
     this.lines = this.container.append('g');
     this.annotations = this.container.append('g');
-    this.title = this.annotations.append('text')
+    // this.hover = this.container.append('rect')
+    //   .attr('width', width - 2 * margin.left)
+    //   .attr('height', height - 2 * margin.top)
+    //   .attr('x', margin.left).attr('y', margin.top)
+    //   .attr('fill', 'none')
+    //   .on('mousemove', () =>{ debugger});
+    this.legend = this.container.append('g');
+    this.title = this.legend.append('text')
       .attr('font-size', fontSize - 2)
       .attr('text-anchor', 'start')
       .attr('dy', '.35em')
@@ -55,10 +70,15 @@ class Timeline extends Component {
     this.renderLegend(this.props);
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate(nextProps, nextState) {
+    // if it's a different character all together, reset state
+    if (nextProps.selected !== this.props.selected) {
+      nextState = Object.assign({}, this.state, {selected: null});
+      this.setState(nextState);
+    }
     this.calculateLines(nextProps);
-    this.renderLines(nextProps);
-    this.renderLegend(nextProps);
+    this.renderLines(nextProps, nextState);
+    this.renderLegend(nextProps, nextState);
 
     return false;
   }
@@ -89,7 +109,7 @@ class Timeline extends Component {
     });
   }
 
-  renderLines(props) {
+  renderLines(props, state) {
     var pairings = this.lines.selectAll('.pairing')
       .data(this.months);
     pairings.exit().remove();
@@ -106,7 +126,8 @@ class Timeline extends Component {
       .classed('area', true)
       .attr('fill-opacity', 0);
 
-    pairings = enter.merge(pairings);
+    pairings = enter.merge(pairings)
+      .attr('opacity', d => !state.selected || d.pairing === state.selected ? 1 : 0.25);
 
     pairings.select('.line')
       .attr('stroke', d => props.annotations[d.pairing].canon ?
@@ -119,7 +140,7 @@ class Timeline extends Component {
         props.colors1(opacity) : props.colors2(opacity))
       .transition(props.transition)
       .attr('d', d => area(d.data))
-      .attr('fill-opacity', 0.05);
+      .attr('fill-opacity', d => state.selected && d.pairing === state.selected ? 0.75 : 0.1);
   }
 
 
@@ -155,7 +176,7 @@ class Timeline extends Component {
       .text(d => d[0]);
   }
 
-  renderLegend(props) {
+  renderLegend(props, state) {
     var data = _.map(props.pairings, months => {
       var pairing = _.values(months)[0][0].pairings[0];
       var character = pairing.replace(props.selected, '').replace('/', '');
@@ -163,7 +184,7 @@ class Timeline extends Component {
       var color = props.annotations[pairing].canon ? props.pink : props.purple;
       return {pairing, character, length, color};
     });
-    var pairings = this.annotations.selectAll('.pairing')
+    var pairings = this.legend.selectAll('.pairing')
       .data(data, d => d.character);
 
     pairings.exit().remove();
@@ -171,7 +192,9 @@ class Timeline extends Component {
     var enter = pairings.enter().append('g')
       .classed('pairing', true)
       .attr('opacity', 0)
-      .attr('transform', (d, i) => 'translate(' + [width * 0.75, height * 0.5 - 1.5 * i * fontSize] + ')');
+      .attr('transform', (d, i) => 'translate(' + [width * 0.75, height * 0.5 - 1.5 * i * fontSize] + ')')
+      .style('cursor', 'pointer')
+      .on('click', this.selectPairing);
 
     enter.append('line')
       .attr('stroke-width', 2)
@@ -196,6 +219,11 @@ class Timeline extends Component {
       .text(props.selected + ' (Total stories)')
       .transition(props.transition)
       .attr('transform', 'translate(' + [width * 0.75, height * 0.5 - 1.5 * data.length * fontSize] + ')');
+  }
+
+  selectPairing(d) {
+    var selected = this.state.selected && this.state.selected === d.pairing ? null : d.pairing;
+    this.setState({selected});
   }
 
   render() {
