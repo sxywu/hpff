@@ -240,7 +240,7 @@ class Timeline extends Component {
     var [x, y] = d3.mouse(this.refs.container);
     var date = d3.timeMonth.floor(xScale.invert(x));
 
-    var subtitle = line ? d3.timeFormat('%B %d, %Y')(date) : 'Total stories';
+    var subtitle = line ? d3.timeFormat('%B %Y')(date) : 'Total stories';
     this.title.text(this.props.selected + ' (' + subtitle + ')');
     this.legend.selectAll('.pairing').select('text')
       .text(d => {
