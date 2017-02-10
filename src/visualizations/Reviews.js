@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
-var width = 14.5 * 12 * dotSize + 2 * margin.left;
+var width = 16 * 12 * dotSize + 2 * margin.left;
 var height = 280;
 var sf = 2;
 
