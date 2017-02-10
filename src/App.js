@@ -128,7 +128,8 @@ class App extends Component {
       transition: d3.transition().duration(1000),
     };
     var mainStyle = {
-      marginLeft: 250,
+      position: 'absolute',
+      left: 250,
     };
 
     var pairings = _.chain(this.state.pairings)
