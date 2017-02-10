@@ -7,6 +7,8 @@ var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 14.5 * 12 * dotSize + 2 * margin.left;
 var height = 360;
+var fontSize = 14;
+
 
 var numTicks = 30;
 var xScale = d3.scaleTime()
@@ -40,6 +42,12 @@ class Timeline extends Component {
       // .attr('fill-opacity', 0.5);
     this.lines = this.container.append('g');
     this.annotations = this.container.append('g');
+    this.title = this.annotations.append('text')
+      .attr('font-size', fontSize - 2)
+      .attr('text-anchor', 'start')
+      .attr('dy', '.35em')
+      .attr('transform', 'translate(' + [width * 0.75, height * 0.5] + ')')
+      .style('font-weight', 600);
 
     this.renderDates();
     this.calculateLines(this.props);
@@ -160,7 +168,6 @@ class Timeline extends Component {
 
     pairings.exit().remove();
 
-    var fontSize = 14;
     var enter = pairings.enter().append('g')
       .classed('pairing', true)
       .attr('opacity', 0)
@@ -184,6 +191,11 @@ class Timeline extends Component {
       .attr('stroke', d => d.color)
     pairings.select('text')
       .text(d => d.character + ' (' + d3.format(',')(d.length) + ' stories)');
+
+    this.title
+      .text(props.selected + ' (Total stories)')
+      .transition(props.transition)
+      .attr('transform', 'translate(' + [width * 0.75, height * 0.5 - 1.5 * data.length * fontSize] + ')');
   }
 
   render() {
