@@ -18,6 +18,10 @@ var xAxis = d3.axisBottom()
   .tickFormat(d => d.getMonth() === 0 ? d.getFullYear() : '')
   .tickSizeOuter(0)
   .scale(xScale);
+var line = d3.line()
+  .x(d => xScale(d.date) + dotSize / 2)
+  .y(d => height - margin.top -  d.length * dotSize)
+  .curve(d3.curveStep);
 var sizeScale = d3.scaleLinear()
   .domain([1, 5]).range([3, 4.5]);
 
@@ -35,7 +39,12 @@ class Timeline extends Component {
 
     this.annotations = this.svg.append('g')
       .attr('transform', 'translate(' + [0, margin.top] + ')');
+    this.line = this.svg.append('path')
+      .attr('fill', 'none')
+      .attr('opacity', 0.25)
+      .attr('stroke-width', 2);
     this.renderDates();
+    this.renderLine(this.props);
     this.renderGifs(this.props);
 
     // axis
@@ -47,6 +56,7 @@ class Timeline extends Component {
   shouldComponentUpdate(nextProps) {
     this.calculateDots(nextProps);
     this.renderDots(nextProps);
+    this.renderLine(nextProps);
     this.renderGifs(nextProps);
 
     return false;
@@ -125,6 +135,22 @@ class Timeline extends Component {
       this.canvas.arc(month.x, month.y, month.size / 2, 0, 2 * Math.PI, false);
       this.canvas.fill();
     });
+  }
+
+  renderLine(props) {
+    var [start, end] = xScale.domain();
+    var data = _.map(d3.timeMonth.range(start, end), date => {
+      var length = props.dots[date] ? props.dots[date].length : 0;
+      length = Math.ceil(length / 5);
+      return {date, length};
+    });
+
+    var opacity = 0.85;
+    this.line
+      .datum(data)
+      .attr('stroke', props.annotations[props.pairing].canon ?
+        props.colors1(opacity) : props.colors2(opacity))
+      .attr('d', line);
   }
 
   renderGifs(props) {
