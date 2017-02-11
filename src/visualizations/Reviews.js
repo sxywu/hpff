@@ -88,7 +88,7 @@ class Timeline extends Component {
   }
 
   calculateDots(props) {
-    var dots = _.chain(props.dots)
+    var dots = _.chain(props.stories)
       .map(stories => {
         var i = -1;
         return _.chain(stories)
@@ -140,7 +140,7 @@ class Timeline extends Component {
   renderLine(props) {
     var [start, end] = xScale.domain();
     var data = _.map(d3.timeMonth.range(start, end), date => {
-      var length = props.dots[date] ? props.dots[date].length : 0;
+      var length = props.stories[date] ? props.stories[date].length : 0;
       length = Math.ceil(length / 5);
       return {date, length};
     });

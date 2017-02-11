@@ -143,9 +143,11 @@ class App extends Component {
       .filter((dots, pairing) => _.includes(pairing, this.state.selected))
       .sortBy(dots => -1 * _.sumBy(_.values(dots), d => d.length)).value();
     // get pairings for selected character
-    var details = _.map(pairings, dots => {
-      var pairing = _.values(dots)[0][0].pairings[0];
-      return <Pairing {...props} {...this.state} pairing={pairing} dots={dots} />;
+    var details = _.map(pairings, stories => {
+      var pairing = _.values(stories)[0][0].pairings[0];
+      var genres = this.state.genres[pairing];
+      return <Pairing {...props} {...this.state} pairing={pairing}
+        genres={genres} stories={stories} />;
     });
 
     return (
