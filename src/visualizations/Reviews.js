@@ -41,7 +41,7 @@ class Timeline extends Component {
       .attr('transform', 'translate(' + [0, margin.top] + ')');
     this.line = this.svg.append('path')
       .attr('fill', 'none')
-      .attr('opacity', 0.25)
+      .attr('opacity', 0.5)
       .attr('stroke-width', 2);
     this.renderDates();
     this.renderLine(this.props);
@@ -178,7 +178,7 @@ class Timeline extends Component {
 
     images = enter.merge(images)
       .attr('transform', (d, i) => {
-        d.y = i % 2 ? 0.5 * gifSize : 1.5 * gifSize;
+        d.y = i % 2 ? 1.5 * gifSize : 0.5 * gifSize;
         return 'translate(' + [xScale(d.date), d.y] + ')'
       });
 
