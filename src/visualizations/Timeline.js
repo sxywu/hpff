@@ -24,13 +24,13 @@ var xAxis = d3.axisBottom()
   .scale(xScale);
 var line = d3.line()
   .x(d => xScale(d.date))
-  .y(d => height - margin.top - d.top * dotSize - 2)
-  .curve(d3.curveCatmullRom);
+  .y(d => height - margin.top - d.top * dotSize)
+  .curve(d3.curveStep);
 var area = d3.area()
   .x(d => xScale(d.date))
-  .y0(d => height - margin.top - d.bottom * dotSize - 2)
+  .y0(d => height - margin.top - d.bottom * dotSize)
   .y1(d => height - margin.top -  d.top * dotSize)
-  .curve(d3.curveCatmullRom);
+  .curve(d3.curveStep);
 
 class Timeline extends Component {
   constructor(props) {
