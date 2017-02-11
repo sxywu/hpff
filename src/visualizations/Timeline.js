@@ -90,13 +90,14 @@ class Timeline extends Component {
       }
     });
     var [start, end] = xScale.domain();
+    var index = 0;
     _.each(d3.timeMonth.range(start, end), date => {
       var bottom = 0;
       _.each(props.pairings, (months, i) => {
         var stories = months[date] || [];
         var top = bottom + Math.ceil(stories.length / 5);
 
-        var index = this.months[i].data.push({
+        this.months[i].data.push({
           date,
           length: stories.length,
           bottom,
@@ -105,7 +106,8 @@ class Timeline extends Component {
         this.months[i].key[date] = index;
 
         bottom = top;
-      })
+      });
+      index += 1;
     });
   }
 
@@ -251,7 +253,7 @@ class Timeline extends Component {
     this.dots
       .style('display', line ? 'block' : 'none')
       .attr('opacity', d => !this.state.selected || d.pairing === this.state.selected ? 1 : 0.25)
-      .attr('cx', xScale(date) + dotSize)
+      .attr('cx', xScale(date))
       .attr('cy', d => height - margin.top - d.data[d.key[date]].top * dotSize)
   }
 
