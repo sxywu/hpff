@@ -7,13 +7,6 @@ var radius = 60;
 var margin = {top: 20, left: 20};
 var width = 250;
 var height = 700;
-
-import positions from '../data/positions.json';
-var nodes = _.map(positions, node => {
-  return Object.assign(node, {
-    image: require('../images/characters/' + node.name + '.svg'),
-  })
-});
 var links = [];
 
 var linkScale = d3.scaleLinear().range([2, 8]);
@@ -41,8 +34,8 @@ class Graph extends Component {
 
     links = _.map(props.pairings, (months, pairing) => {
       var [source, target] = pairing.split('/');
-      source = _.find(nodes, node => node.name === source);
-      target = _.find(nodes, node => node.name === target);
+      source = _.find(props.characters, node => node.name === source);
+      target = _.find(props.characters, node => node.name === target);
 
       var length = _.reduce(months, (sum, stories) => sum + stories.length, 0);
       return {
@@ -57,7 +50,7 @@ class Graph extends Component {
   renderGraph(props) {
     // images
     this.circles = this.container.selectAll('.node')
-      .data(nodes, d => d.name)
+      .data(props.characters, d => d.name)
       .enter().append('g')
       .classed('node', true)
       .attr('transform', d => 'translate(' + [d.x, d.y] + ')')

@@ -5,7 +5,7 @@ import chroma from 'chroma-js';
 
 import './App.css';
 import Timeline from './visualizations/Timeline';
-import Reviews from './visualizations/Reviews';
+import Pairing from './visualizations/Pairing';
 import Graph from './visualizations/Graph';
 
 import dates from './data/dates.json';
@@ -14,6 +14,12 @@ import allGifs from './data/gifs.json';
 var gifs = _.map(allGifs.all, file =>
   [file.replace('.gif', ''), require('./images/gifs/' + file)]);
 var gifsNested = allGifs.nested;
+import positions from './data/positions.json';
+var characters = _.map(positions, node => {
+  return Object.assign(node, {
+    image: require('./images/characters/' + node.name + '.svg'),
+  })
+});
 
 var numYears = 15;
 var colorScale = d3.scaleLog();
@@ -124,6 +130,7 @@ class App extends Component {
       gifs,
       gifsNested,
       annotations,
+      characters,
       selectCharacter: this.selectCharacter,
       transition: d3.transition().duration(1000),
     };
@@ -136,9 +143,9 @@ class App extends Component {
       .filter((dots, pairing) => _.includes(pairing, this.state.selected))
       .sortBy(dots => -1 * _.sumBy(_.values(dots), d => d.length)).value();
     // get pairings for selected character
-    var reviews = _.map(pairings, dots => {
+    var details = _.map(pairings, dots => {
       var pairing = _.values(dots)[0][0].pairings[0];
-      return <Reviews {...props} pairing={pairing} dots={dots} />;
+      return <Pairing {...props} {...this.state} pairing={pairing} dots={dots} />;
     });
 
     return (
@@ -146,7 +153,7 @@ class App extends Component {
         <Graph {...props} {...this.state} />
         <div style={mainStyle}>
           <Timeline {...props} {...this.state} pairings={pairings} />
-          {reviews}
+          {details}
         </div>
       </div>
     );
