@@ -30,6 +30,8 @@ var gray = '#665059';
 var colors1 = chroma.scale([cream, cream, '#f183a6', pink]);
 var colors2 = chroma.scale([cream, cream, '#e3acd2', purple]);
     // .range(['#f5d5ca', '#e7b7ce', '#da99d3', , '#a2094a']);
+var keepGenres = ['Drama', 'Humor', 'Angst', 'Fluff',
+  'Action/Adventure', 'Horror/Dark', 'Mystery', 'Action'];
 
 class App extends Component {
   constructor(props) {
@@ -81,7 +83,7 @@ class App extends Component {
     pairings[pairing][d.publishGroup].push(d);
 
     _.each(d.genres, genre => {
-      if (!genre || genre === 'Romance') return;
+      if (!genre || !_.includes(keepGenres, genre)) return;
 
       if (!genres[pairing]) {
         genres[pairing] = {};
