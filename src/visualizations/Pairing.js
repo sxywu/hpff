@@ -24,13 +24,16 @@ class Pairing extends Component {
     var color = this.props.annotations[this.props.pairing].canon ? this.props.pink : this.props.purple;
     var heart = (<span style={{color}}>♥</span>);
 
-    var genres = _.map(this.props.genres, (stories, genre) => {
-      var data = {
-        genre,
-        months: _.groupBy(stories, story => story.publishGroup),
-      };
-      return <Genre {...this.props} {...data} />;
-    });
+    var genres = _.chain(this.props.genres)
+      .map((stories, genre) => {
+        return {
+          genre,
+          stories,
+          months: _.groupBy(stories, story => story.publishGroup),
+        };
+      }).sortBy(d => d.genre)
+      .map(data => <Genre {...this.props} {...data} />)
+      .value();
 
     return (
       <div>
