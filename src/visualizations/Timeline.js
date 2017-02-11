@@ -94,7 +94,7 @@ class Timeline extends Component {
       var bottom = 0;
       _.each(props.pairings, (months, i) => {
         var stories = months[date] || [];
-        var top = bottom + stories.length / 5;
+        var top = bottom + Math.ceil(stories.length / 5);
 
         var index = this.months[i].data.push({
           date,
@@ -149,7 +149,7 @@ class Timeline extends Component {
       .classed('dot', true)
       .merge(this.dots)
       .attr('fill', d => d.fill)
-      .attr('r', dotSize * .75)
+      .attr('r', dotSize * 0.65)
       .style('display', 'none')
   }
 
@@ -252,7 +252,7 @@ class Timeline extends Component {
       .style('display', line ? 'block' : 'none')
       .attr('opacity', d => !this.state.selected || d.pairing === this.state.selected ? 1 : 0.25)
       .attr('cx', xScale(date) + dotSize)
-      .attr('cy', d => height - margin.top - d.data[d.key[date]].top * dotSize - 2)
+      .attr('cy', d => height - margin.top - d.data[d.key[date]].top * dotSize)
   }
 
   render() {
