@@ -24,17 +24,14 @@ var line = d3.line()
 var area = d3.area()
   .x(d => xScale(d.date))
   .y0(d => height - margin.top)
-  .y1(d => height - margin.top -  d.length * dotSize)
+  .y1(d => height - margin.top - d.length * dotSize)
   .curve(d3.curveStep);
 
 class Genre extends Component {
 
   componentDidMount() {
     this.container = d3.select(this.refs.container);
-    // axis
-    this.axis = this.container.append('g')
-      .attr('transform', 'translate(' + [0, height - margin.top] + ')')
-      .call(xAxis);
+
     this.area = this.container.append('path')
       .attr('opacity', .1);
     this.line = this.container.append('path')
@@ -42,11 +39,24 @@ class Genre extends Component {
       .attr('stroke-width', 2)
       .attr('fill', 'none');
 
+    this.annotations = this.container.append('g');
+    this.axis = this.annotations.append('g')
+      .attr('transform', 'translate(' + [0, height - margin.top] + ')')
+      .call(xAxis);
+    this.title = this.annotations.append('text')
+      .attr('x', margin.left)
+      .attr('text-anchor', 'start')
+      .attr('dy', '.35em');
+
     this.renderArea(this.props);
+    this.renderDates();
+    this.renderTitle(this.props);
   }
 
   shouldComponentUpdate(nextProps) {
     this.renderArea(nextProps);
+    this.renderTitle(nextProps);
+
     return false;
   }
 
@@ -60,7 +70,7 @@ class Genre extends Component {
       return {date, length};
     });
 
-    height = Math.max(yMax * dotSize + 2 * margin.top, 50);
+    height = Math.max(yMax * dotSize + 2 * margin.top, 40);
     this.container.attr('height', height);
     this.axis.attr('transform', 'translate(' + [0, height - margin.top] + ')');
 
@@ -75,6 +85,31 @@ class Genre extends Component {
       .datum(data)
       .attr('d', line)
       .attr('stroke', fill);
+
+  }
+
+  renderDates() {
+    var y = 0;
+    var dates = this.annotations.selectAll('.date')
+      .data(this.props.dates).enter().append('g')
+      .classed('date', true)
+      .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
+
+    dates.append('line')
+      .attr('y2', height - margin.top - y)
+      .attr('stroke', this.props.gray)
+      .attr('stroke-dasharray', d => d[3] === 'film' ? 'none' : '5 5')
+      .attr('opacity', 0.2);
+  }
+
+  renderTitle(props) {
+    var fontSize = 14;
+    var length = d3.format(',')(props.stories.length);
+
+    this.title
+      .attr('y', fontSize / 2)
+      .attr('font-size', fontSize - 2)
+      .text(props.genre + ' (' + length + ' stories)');
   }
 
   render() {
