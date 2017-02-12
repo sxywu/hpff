@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
 
-import Hover from './Hover';
-
 var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
