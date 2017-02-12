@@ -7,7 +7,7 @@ var gifSize = 50;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 16 * 12 * dotSize + 2 * margin.left;
-var height = 280;
+var height = 300;
 var sf = 2;
 
 var xScale = d3.scaleTime()
@@ -176,7 +176,7 @@ class Timeline extends Component {
 
     images = enter.merge(images)
       .attr('transform', (d, i) => {
-        d.y = i % 2 ? 1.5 * gifSize : 0.5 * gifSize;
+        d.y = (i % 2 ? 1.5 * gifSize : 0.5 * gifSize) + 1.5 * margin.top;
         return 'translate(' + [xScale(d.date), d.y] + ')'
       });
 
@@ -185,7 +185,8 @@ class Timeline extends Component {
   }
 
   renderDates() {
-    var y = 0;
+    var fontSize = 10;
+    var y = margin.top / 2;
     var dates = this.annotations.selectAll('.date')
       .data(this.props.dates).enter().append('g')
       .classed('date', true)
@@ -196,6 +197,22 @@ class Timeline extends Component {
       .attr('stroke', this.props.gray)
       .attr('stroke-dasharray', d => d[3] === 'film' ? 'none' : '5 5')
       .attr('opacity', 0.2);
+
+    dates.append('circle')
+      .attr('cy', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
+      .attr('r', (fontSize + 2) / 2)
+      .attr('fill', d => d[3] === 'book' ? '#fff' : this.props.gray)
+      .attr('stroke', this.props.gray)
+      .attr('stroke-width', 2);
+
+    dates.append('text')
+      .attr('y', d => d[0] === 5 && d[3] === 'film' ? -1.5 * fontSize : 0)
+      .attr('dy', '.35em')
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d[3] === 'book' ? this.props.gray : '#fff')
+      .attr('font-size', fontSize)
+      .attr('font-weight', 600)
+      .text(d => d[0]);
   }
 
   render() {
