@@ -78,13 +78,10 @@ class Pairing extends Component {
       var year = d3.timeFormat('%Y')(extent[0]);
 
       var stories = _.map(this.state.hovered.stories, (story, i) => {
-        var link = 'http://harrypotterfanfiction.com/' + story.title.link;
         return (
           <li>
             <div>
-              <a href={link} target='_new'>
-                <strong>{story.title.text}</strong>
-              </a> ({story.reviews.text} reviews)
+              <strong>{story.title.text}</strong> ({d3.format(',')(story.reviews.text)} reviews)
             </div>
             <div>
               {story.genres.join(', ')}
@@ -94,7 +91,12 @@ class Pairing extends Component {
       });
       hovered = (
         <div style={hoverStyle}>
-          <p className='header'>{month} {dates}, {year}</p>
+          <div>
+            <strong>{month} {dates}, {year}</strong>
+          </div>
+          <sup>
+            *click to open top story
+          </sup>
           <ol style={{paddingLeft: fontSize, margin: 0}}>
             {stories}
           </ol>

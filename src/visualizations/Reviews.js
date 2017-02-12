@@ -49,13 +49,15 @@ class Timeline extends Component {
     super(props);
 
     this.hoverCanvas = this.hoverCanvas.bind(this);
+    this.clickCanvas = this.clickCanvas.bind(this);
   }
 
   componentDidMount() {
     this.crispyCanvas(this.refs.hidden, this.props, 'hidden');
     this.crispyCanvas(this.refs.canvas, this.props, 'canvas');
     d3.select(this.refs.canvas).on('mousemove', this.hoverCanvas)
-      .on('mouseleave', this.hoverCanvas);
+      .on('mouseleave', this.hoverCanvas)
+      .on('click', this.clickCanvas);
 
     this.svg = d3.select(this.refs.svg);
     this.defs = this.svg.append('defs');
@@ -291,6 +293,23 @@ class Timeline extends Component {
     } else if (!square && this.props.hovered) {
       this.square.attr('opacity', 0);
       this.props.hoverCanvas();
+    }
+  }
+
+  clickCanvas() {
+    var [x, y] = d3.mouse(this.refs.canvas);
+
+    // multiply x and y by sf bc crispy canvas
+    var col = this.hidden.getImageData(x * sf, y * sf, 1, 1).data;
+    var color = 'rgb(' + col[0] + "," + col[1] + ","+ col[2] + ")";
+    var square = this.hoverLookup[color];
+
+    if (square) {
+      // open up top story
+      var link = square.stories[0].title.link;
+      link = (_.includes(link, 'harrypotterfanfiction.com') ? '' :
+        'http://harrypotterfanfiction.com/') + link;
+      window.open(link, '_new');
     }
   }
 
