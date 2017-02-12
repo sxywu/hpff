@@ -13,10 +13,13 @@
     "react": "^15.4.2",
     "react-dom": "^15.4.2"
   },
+  "homepage": "http://sxywu.github.io/hpff",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy": "npm run build&&gh-pages -d build",
     "test": "react-scripts test --env=jsdom",
+    "clean": "rm -rf node_modules/gh-pages/.cache",
     "eject": "react-scripts eject"
   }
 }
