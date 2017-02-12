@@ -163,7 +163,7 @@ class Genre extends Component {
     var length = d3.format(',')(props.stories.length);
 
     this.title
-      .attr('y', fontSize / 2)
+      .attr('y', fontSize)
       .attr('font-size', fontSize - 2)
       .text(props.genre + ' (' + length + ' stories)');
   }

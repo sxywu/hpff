@@ -11,6 +11,10 @@ var radius = 75;
 class Pairing extends Component {
 
   render() {
+    var style = {
+      paddingTop: 120,
+    };
+
     var other = this.props.pairing.replace(this.props.selected, '').replace('/', '');
     var imageStyle = {
       padding: 5,
@@ -36,11 +40,11 @@ class Pairing extends Component {
       .value();
 
     return (
-      <div>
+      <div style={style}>
         <div>{images}</div>
         <div>{this.props.selected} {heart} {other}</div>
-        {genres}
         <Reviews {...this.props} />
+        {genres}
       </div>
     );
   }
