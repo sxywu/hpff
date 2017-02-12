@@ -22,8 +22,6 @@ var line = d3.line()
   .x(d => xScale(d.date) + dotSize / 2)
   .y(d => height - margin.top -  d.length * dotSize)
   .curve(d3.curveStep);
-var sizeScale = d3.scaleLinear()
-  .domain([1, 5]).range([3, 4.5]);
 
 class Timeline extends Component {
 
@@ -41,7 +39,7 @@ class Timeline extends Component {
       .attr('transform', 'translate(' + [0, margin.top] + ')');
     this.line = this.svg.append('path')
       .attr('fill', 'none')
-      .attr('opacity', 0.5)
+      .attr('opacity', 0.75)
       .attr('stroke-width', 2);
     this.renderDates();
     this.renderLine(this.props);
@@ -112,12 +110,12 @@ class Timeline extends Component {
       .groupBy(d => d.month)
       .map(stories => {
         return _.map(stories, (d, i) => {
-          var size = sizeScale(d.length);
+          var size = dotSize;
           var color = props.annotations[d.pairing].canon ? props.colors1 : props.colors2;
           color = color(props.colorScale(d.max.reviews.text));
           return {
-            x: xScale(d.month) + dotSize / 2,
-            y: height - margin.top - (parseInt(i) + 0.5) * dotSize,
+            x: xScale(d.month),
+            y: height - margin.top - (parseInt(i) + 1) * dotSize,
             size,
             color,
           }
@@ -132,7 +130,7 @@ class Timeline extends Component {
     _.each(this.months, month => {
       this.canvas.beginPath();
       this.canvas.fillStyle = month.color;
-      this.canvas.arc(month.x, month.y, month.size / 2, 0, 2 * Math.PI, false);
+      this.canvas.rect(month.x, month.y, dotSize, dotSize);
       this.canvas.fill();
     });
   }
