@@ -82,6 +82,7 @@ class Genre extends Component {
 
     this.renderArea(this.props);
     this.renderDates();
+    this.updateHeight(this.props);
     this.updateTitle(this.props);
     this.calculateDots(this.props);
     this.renderDots(this.props);
@@ -91,6 +92,7 @@ class Genre extends Component {
     if (!nextProps.update) return false;
 
     this.renderArea(nextProps);
+    this.updateHeight(nextProps);
     this.updateTitle(nextProps);
     this.calculateDots(nextProps);
     this.renderDots(nextProps);
@@ -187,12 +189,7 @@ class Genre extends Component {
       yMax = Math.max(yMax, length);
       return {date, length};
     });
-
     height = Math.max(yMax * dotSize + 2 * margin.top, 40);
-    this.container.attr('height', height);
-    this.axis.attr('transform', 'translate(' + [0, height - margin.top] + ')');
-    this.crispyCanvas(this.refs.canvas, props, 'canvas')
-    this.crispyCanvas(this.refs.hidden, props, 'hidden');
 
     var opacity = 0.85;
     var fill = props.annotations[props.pairing].canon ?
@@ -205,17 +202,23 @@ class Genre extends Component {
   }
 
   renderDates() {
-    var y = 0;
-    var dates = this.annotations.selectAll('.date')
-      .data(this.props.dates).enter().append('g')
+    this.dates = this.annotations.selectAll('.date')
+      .data(this.props.dates).enter().append('line')
       .classed('date', true)
-      .attr('transform', d => 'translate(' + [xScale(d[2]), y] + ')');
-
-    dates.append('line')
-      .attr('y2', height - margin.top - y)
+      .attr('transform', d => 'translate(' + [xScale(d[2]), 0] + ')')
+      .attr('y2', height - margin.top)
       .attr('stroke', this.props.gray)
       .attr('stroke-dasharray', d => d[3] === 'film' ? 'none' : '5 5')
       .attr('opacity', 0.2);
+  }
+
+  updateHeight(props) {
+    this.container.attr('height', height);
+    this.axis.attr('transform', 'translate(' + [0, height - margin.top] + ')');
+    this.dates.attr('y2', height - margin.top);
+
+    this.crispyCanvas(this.refs.canvas, props, 'canvas')
+    this.crispyCanvas(this.refs.hidden, props, 'hidden');
   }
 
   updateTitle(props) {
