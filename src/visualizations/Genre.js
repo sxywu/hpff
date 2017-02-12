@@ -86,6 +86,8 @@ class Genre extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
+    if (!nextProps.update) return false;
+
     this.renderArea(nextProps);
     this.updateTitle(nextProps);
     this.calculateDots(nextProps);
@@ -117,7 +119,7 @@ class Genre extends Component {
               pairing: stories[0].pairings[0],
               extent: d3.extent(stories, story => story.published),
               month: stories[0].publishGroup,
-              all: stories,
+              all: _.sortBy(stories, d => -d.reviews.text),
               max: _.maxBy(stories, story => story.reviews.text),
               length: stories.length,
             };
@@ -137,7 +139,7 @@ class Genre extends Component {
           var y = height - margin.top - (parseInt(i) + 1) * dotSize;
 
           var hidden = genColor();
-          this.hoverLookup[hidden] = {x, y, stories: d.all};
+          this.hoverLookup[hidden] = {x, y, stories: d.all, extent: d.extent};
 
           return {
             x: xScale(d.month),
@@ -159,8 +161,10 @@ class Genre extends Component {
     _.each(this.months, month => {
       this.canvas.beginPath();
       this.canvas.fillStyle = month.color;
+      this.canvas.strokeStyle = month.color;
       this.canvas.rect(month.x, month.y, dotSize, dotSize);
       this.canvas.fill();
+      this.canvas.stroke();
 
       // hidden canvas for interaction
       this.hidden.beginPath();
@@ -229,15 +233,18 @@ class Genre extends Component {
     // multiply x and y by sf bc crispy canvas
     var col = this.hidden.getImageData(x * sf, y * sf, 1, 1).data;
     var color = 'rgb(' + col[0] + "," + col[1] + ","+ col[2] + ")";
-    var stories = this.hoverLookup[color];
+    var square = this.hoverLookup[color];
 
-    if (stories) {
+    if (square && this.props.hovered !== square.stories) {
       this.square
-        .attr('x', stories.x)
-        .attr('y', stories.y)
+        .attr('x', square.x)
+        .attr('y', square.y)
         .attr('opacity', 1);
-    } else {
+
+      this.props.hoverCanvas(square);
+    } else if (!square && this.props.hovered) {
       this.square.attr('opacity', 0);
+      this.props.hoverCanvas();
     }
   }
 

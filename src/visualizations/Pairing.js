@@ -7,8 +7,26 @@ import Reviews from './Reviews';
 import Genre from './Genre';
 
 var radius = 75;
+var dotSize = 5;
+var margin = {top: 20, left: 20};
+var width = 16 * 12 * dotSize + 2 * margin.left;
 
 class Pairing extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {update: true, hovered: null}
+    this.hoverCanvas = this.hoverCanvas.bind(this);
+  }
+
+  componentWillReceiveProps() {
+    this.setState({update: true});
+  }
+
+  hoverCanvas(hovered) {
+    this.setState({update: false, hovered});
+  }
 
   render() {
     var style = {
@@ -36,15 +54,63 @@ class Pairing extends Component {
           months: _.groupBy(stories, story => story.publishGroup),
         };
       }).sortBy(d => d.genre)
-      .map(data => <Genre {...this.props} {...data} />)
+      .map(data => <Genre {...this.props} {...this.state}
+        {...data} hoverCanvas={this.hoverCanvas} />)
       .value();
+
+    var fontSize = 12;
+    var hoverStyle = {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: width * 0.28,
+      textAlign: 'left',
+      fontSize,
+      fontFamily: 'Open Sans',
+      backgroundColor: 'rgba(255,255,255,0.75)',
+      borderRadius: 3,
+    };
+    var hovered;
+    if (this.state.hovered) {
+      var extent = this.state.hovered.extent;
+      var month = d3.timeFormat('%B')(extent[0]);
+      var dates = _.chain(extent).map(d => d.getDate()).uniq().value().join(' - ');
+      var year = d3.timeFormat('%Y')(extent[0]);
+
+      var stories = _.map(this.state.hovered.stories, (story, i) => {
+        var link = 'http://harrypotterfanfiction.com/' + story.title.link;
+        return (
+          <li>
+            <div>
+              <a href={link} target='_new'>
+                <strong>{story.title.text}</strong>
+              </a> ({story.reviews.text} reviews)
+            </div>
+            <div>
+              {story.genres.join(', ')}
+            </div>
+          </li>
+        );
+      });
+      hovered = (
+        <div style={hoverStyle}>
+          <p className='header'>{month} {dates}, {year}</p>
+          <ol style={{paddingLeft: fontSize, margin: 0}}>
+            {stories}
+          </ol>
+        </div>
+      );
+    }
 
     return (
       <div style={style}>
         <div>{images}</div>
         <div>{this.props.selected} {heart} {other}</div>
-        <Reviews {...this.props} />
-        {genres}
+        <div style={{position: 'relative'}}>
+          <Reviews {...this.props} {...this.state} hoverCanvas={this.hoverCanvas} />
+          {genres}
+          {hovered}
+        </div>
       </div>
     );
   }
