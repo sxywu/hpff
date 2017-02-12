@@ -97,7 +97,7 @@ class Pairing extends Component {
           <sup>
             *click to open top story
           </sup>
-          <ol style={{paddingLeft: fontSize, margin: 0}}>
+          <ol style={{paddingLeft: 0, margin: 0}}>
             {stories}
           </ol>
         </div>
