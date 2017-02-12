@@ -31,7 +31,7 @@ var colors1 = chroma.scale([cream, cream, '#f183a6', pink]);
 var colors2 = chroma.scale([cream, cream, '#e3acd2', purple]);
     // .range(['#f5d5ca', '#e7b7ce', '#da99d3', , '#a2094a']);
 var keepGenres = ['Drama', 'Humor', 'Angst', 'Fluff',
-  'Action/Adventure', 'Horror/Dark', 'Mystery', 'Action'];
+  'Action/Adventure', 'Horror/Dark', 'Mystery'];
 
 class App extends Component {
   constructor(props) {
