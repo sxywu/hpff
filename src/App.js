@@ -7,6 +7,7 @@ import './App.css';
 import Timeline from './visualizations/Timeline';
 import Pairing from './visualizations/Pairing';
 import Graph from './visualizations/Graph';
+import Footer from './Footer';
 
 import dates from './data/dates.json';
 import annotations from './data/annotations.json';
@@ -153,6 +154,7 @@ class App extends Component {
         <Graph {...props} {...this.state} />
         <Timeline {...props} {...this.state} pairings={pairings} />
         {details}
+        <Footer {...props} {...this.state} />
       </div>
     );
   }
