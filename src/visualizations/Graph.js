@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 
 var radius = 60;
 var margin = {top: 20, left: 20};
-var width = 250;
+var width = 260;
 var height = 700;
 var links = [];
 
@@ -53,7 +53,7 @@ class Graph extends Component {
       .data(props.characters, d => d.name)
       .enter().append('g')
       .classed('node', true)
-      .attr('transform', d => 'translate(' + [d.x, d.y] + ')')
+      .attr('transform', d => 'translate(' + [d.y, d.x] + ')')
       .style('cursor', 'pointer')
       .on('click', d => props.selectCharacter(d));
 
@@ -111,19 +111,13 @@ class Graph extends Component {
     var dx = d.target.x - d.source.x,
         dy = d.target.y - d.source.y,
         dr = (Math.sqrt(dx * dx + dy * dy) * 2) / 2;
-    return "M" + d.source.x + "," + d.source.y +
-      "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+    return "M" + d.source.y + "," + d.source.x +
+      "A" + dr + "," + dr + " 0 0,1 " + d.target.y + "," + d.target.x;
   }
 
   render() {
-    var style = {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-    };
-
     return (
-      <svg ref='container' style={style} width={width} height={height} />
+      <svg ref='container' width={height} height={width} />
     );
   }
 }
