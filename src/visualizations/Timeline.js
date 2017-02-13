@@ -189,11 +189,14 @@ class Timeline extends Component {
   }
 
   renderLegend(props, state) {
+    var totalStories = 0;
     var data = _.map(props.pairings, months => {
       var pairing = _.values(months)[0][0].pairings[0];
       var character = pairing.replace(props.selected, '').replace('/', '');
       var length = _.reduce(months, (sum, stories) => sum + stories.length, 0);
       var color = props.annotations[pairing].canon ? props.pink : props.purple;
+      totalStories += length;
+
       return {pairing, character, length, color, months};
     });
     var pairings = this.legend.selectAll('.pairing')
@@ -228,7 +231,7 @@ class Timeline extends Component {
       .text(d => d.character + ' (' + d3.format(',')(d.length) + ' stories)');
 
     this.title
-      .text(props.selected + ' (Total stories)')
+      .text('Total (' + d3.format(',')(totalStories) + ' stories)')
       .transition(props.transition)
       .attr('transform', 'translate(' + [width * 0.75, height * 0.5 - 1.5 * data.length * fontSize] + ')');
   }
@@ -242,13 +245,16 @@ class Timeline extends Component {
     var [x, y] = d3.mouse(this.refs.container);
     var date = d3.timeMonth.floor(xScale.invert(x));
 
-    var subtitle = line ? d3.timeFormat('%B %Y')(date) : 'Total stories';
-    this.title.text(this.props.selected + ' (' + subtitle + ')');
+    var totalStories = 0;
     this.legend.selectAll('.pairing').select('text')
       .text(d => {
         var length = line ? (d.months[date] ? d.months[date].length : 0) : d.length;
+        totalStories += length;
+
         return d.character + ' (' + d3.format(',')(length) + ' stories)';
       });
+    var title = line ? d3.timeFormat('%b %Y')(date) : 'Total';
+    this.title.text(title + ' (' + d3.format(',')(totalStories) + ' stories)');
 
     this.dots
       .style('display', line ? 'block' : 'none')
@@ -258,8 +264,25 @@ class Timeline extends Component {
   }
 
   render() {
+    var style = {
+      paddingTop: 120,
+    };
+
+    var imageStyle = {
+      padding: 5,
+      width: 100,
+    };
+    var image = _.find(this.props.characters, c => c.name === this.props.selected);
+    if (image) {
+      image = (<img src={image.image} style={imageStyle} />);
+    }
+
     return (
-      <svg ref='container' width={width} height={height} />
+      <div style={style}>
+        <div>{image}</div>
+        <div>{this.props.selected}</div>
+        <svg ref='container' width={width} height={height} />
+      </div>
     );
   }
 }
