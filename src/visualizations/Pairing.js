@@ -61,9 +61,9 @@ class Pairing extends Component {
     var fontSize = 12;
     var hoverStyle = {
       position: 'absolute',
-      top: 0,
+      top: margin.top,
       right: 0,
-      width: width * 0.28,
+      width: width * 0.25,
       textAlign: 'left',
       fontSize,
       fontFamily: 'Open Sans',
@@ -73,7 +73,7 @@ class Pairing extends Component {
     var hovered;
     if (this.state.hovered) {
       var extent = this.state.hovered.extent;
-      var month = d3.timeFormat('%B')(extent[0]);
+      var month = d3.timeFormat('%b')(extent[0]);
       var dates = _.chain(extent).map(d => d.getDate()).uniq().value().join(' - ');
       var year = d3.timeFormat('%Y')(extent[0]);
 
@@ -100,6 +100,14 @@ class Pairing extends Component {
           <ol style={{paddingLeft: 0, margin: 0}}>
             {stories}
           </ol>
+        </div>
+      );
+    } else {
+      var numStories = _.sumBy(_.values(this.props.stories), d => d.length);
+      hovered = (
+        <div style={hoverStyle}>
+          <div><strong>Total ({d3.format(',')(numStories)} stories)</strong></div>
+          <sup>*hover to see stories</sup>
         </div>
       );
     }
