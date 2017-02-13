@@ -136,10 +136,6 @@ class App extends Component {
       selectCharacter: this.selectCharacter,
       transition: d3.transition().duration(1000),
     };
-    var mainStyle = {
-      position: 'absolute',
-      left: 250,
-    };
 
     var pairings = _.chain(this.state.pairings)
       .filter((dots, pairing) => _.includes(pairing, this.state.selected))
@@ -155,10 +151,8 @@ class App extends Component {
     return (
       <div className="App">
         <Graph {...props} {...this.state} />
-        <div style={mainStyle}>
-          <Timeline {...props} {...this.state} pairings={pairings} />
-          {details}
-        </div>
+        <Timeline {...props} {...this.state} pairings={pairings} />
+        {details}
       </div>
     );
   }

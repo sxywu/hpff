@@ -74,7 +74,7 @@ class Timeline extends Component {
     this.renderLines(nextProps, nextState);
     this.renderLegend(nextProps, nextState);
 
-    return false;
+    return true;
   }
 
   calculateLines(props) {

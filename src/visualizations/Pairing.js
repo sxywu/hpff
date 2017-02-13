@@ -31,6 +31,8 @@ class Pairing extends Component {
   render() {
     var style = {
       paddingTop: 120,
+      width,
+      margin: 'auto',
     };
 
     var other = this.props.pairing.replace(this.props.selected, '').replace('/', '');
