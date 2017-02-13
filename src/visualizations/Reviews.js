@@ -41,7 +41,7 @@ function genColor(){
   return col;
 }
 
-class Timeline extends Component {
+class Reviews extends Component {
 
   constructor(props) {
     super(props);
@@ -327,7 +327,7 @@ class Timeline extends Component {
     };
 
     return (
-      <div className='Timeline' style={style}>
+      <div className='Reviews' style={style}>
         <canvas ref='hidden' style={{display: 'none'}} />
         <canvas ref='canvas' />
         <svg ref='svg' style={vizStyle} />
@@ -336,4 +336,4 @@ class Timeline extends Component {
   }
 }
 
-export default Timeline;
+export default Reviews;
