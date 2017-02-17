@@ -265,7 +265,7 @@ class Timeline extends Component {
 
   render() {
     var style = {
-      paddingTop: 120,
+      paddingTop: 60,
     };
 
     var imageStyle = {

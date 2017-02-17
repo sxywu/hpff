@@ -30,7 +30,7 @@ class Pairing extends Component {
 
   render() {
     var style = {
-      paddingTop: 120,
+      paddingTop: 80,
       width,
       margin: 'auto',
     };

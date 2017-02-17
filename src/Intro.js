@@ -10,7 +10,7 @@ class Intro extends Component {
   render() {
     var style = {
       width: 700,
-      margin: 'auto',
+      margin: '80px auto',
     };
     var images = _.map(['Harry', 'Hermione', 'Ginny'], character => {
       var style = {

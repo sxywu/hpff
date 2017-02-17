@@ -152,6 +152,10 @@ class App extends Component {
     return (
       <div className="App">
         <Intro {...props} {...this.state} />
+        <p style={{lineHeight: 1.6}}>
+          <span style={{color: pink}}>♥</span>
+          <span style={{color: purple}}>♥</span>
+        </p>
         <Timeline {...props} {...this.state} pairings={pairings} />
         {details}
         <Footer {...props} {...this.state} />
