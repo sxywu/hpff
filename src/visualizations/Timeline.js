@@ -121,8 +121,7 @@ class Timeline extends Component {
     enter.append('path')
       .classed('line', true)
       .attr('fill', 'none')
-      .attr('stroke-opacity', 0)
-      .attr('stroke-width', 2);
+      .attr('stroke-opacity', 0);
     enter.append('path')
       .classed('area', true)
       .attr('fill-opacity', 0);
@@ -134,6 +133,7 @@ class Timeline extends Component {
 
     pairings.select('.line')
       .attr('stroke', d => d.fill)
+      .attr('stroke-width', (d, i) => i === this.months.length - 1 ? 2 : 1)
       .transition(props.transition)
       .attr('stroke-opacity', .75)
       .attr('d', d => line(d.data));
