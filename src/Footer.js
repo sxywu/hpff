@@ -43,7 +43,7 @@ With all my love, thank you JKR <span style={{color: this.props.pink}}>♥</span
         <br />
         <sup>
 many many thank you’s to <a href='https://twitter.com/catmule' target='_new'>Catherine Madden</a> for<br />
-the beautiful illustrations of every character (and of me)
+the beautiful illustrations of every character (and of me) 😍
         </sup>
         <br />
         <br />
