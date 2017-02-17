@@ -4,9 +4,9 @@ import * as d3 from 'd3';
 import chroma from 'chroma-js';
 
 import './App.css';
+import Intro from './Intro';
 import Timeline from './visualizations/Timeline';
 import Pairing from './visualizations/Pairing';
-import Graph from './visualizations/Graph';
 import Footer from './Footer';
 
 import dates from './data/dates.json';
@@ -151,7 +151,7 @@ class App extends Component {
 
     return (
       <div className="App">
-        <Graph {...props} {...this.state} />
+        <Intro {...props} {...this.state} />
         <Timeline {...props} {...this.state} pairings={pairings} />
         {details}
         <Footer {...props} {...this.state} />
