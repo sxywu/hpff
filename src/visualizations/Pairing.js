@@ -10,6 +10,7 @@ var radius = 75;
 var dotSize = 5;
 var margin = {top: 20, left: 20};
 var width = 16 * 12 * dotSize + 2 * margin.left;
+var legendWidth = 290;
 
 class Pairing extends Component {
 
@@ -20,8 +21,55 @@ class Pairing extends Component {
     this.hoverCanvas = this.hoverCanvas.bind(this);
   }
 
+  componentDidMount() {
+    // create legend
+    var perWidth = 10;
+    var numCubes = legendWidth / perWidth;
+    var data = _.times(numCubes, i => i / (numCubes - 1));
+
+    this.legend = d3.select(this.refs.legend)
+      .append('g').attr('transform', 'translate(' + [margin.left, 0] + ')')
+      .selectAll('.cube').data(data);
+
+    this.legend.exit().remove();
+    var enter = this.legend.enter().append('g')
+      .classed('cube', true)
+      .attr('transform', (d, i) => 'translate(' + [i * perWidth, 0]+ ')');
+    enter.append('rect')
+      .attr('width', perWidth)
+      .attr('height', perWidth);
+    enter.filter((d, i) => i === 0 || (i + 1) % 5 === 0)
+      .append('text')
+      .attr('y', 1.5 * perWidth + 2)
+      .attr('dy', '.35em')
+      .attr('text-anchor', 'start')
+      .attr('font-size', perWidth);
+
+    var color = this.props.annotations[this.props.pairing].canon ?
+      this.props.colors1 : this.props.colors2;
+    this.legend = enter.merge(this.legend);
+    this.legend.select('rect')
+      .attr('fill', color);
+
+    this.legend.select('text')
+      .text((d, i) => {
+        var reviews = Math.round(this.props.colorScale.invert(d));
+        if (reviews >= 1000) {
+          return (reviews / 1000).toFixed(1) + 'k reviews';
+        }
+        return reviews;
+      });
+  }
+
   componentWillReceiveProps() {
     this.setState({update: true});
+  }
+
+  componentDidUpdate() {
+    var color = this.props.annotations[this.props.pairing].canon ?
+      this.props.colors1 : this.props.colors2;
+    this.legend.select('rect')
+      .attr('fill', color);
   }
 
   hoverCanvas(hovered) {
@@ -45,7 +93,8 @@ class Pairing extends Component {
       return (<img src={character.image} style={imageStyle} />);
     });
 
-    var color = this.props.annotations[this.props.pairing].canon ? this.props.pink : this.props.purple;
+    var color = this.props.annotations[this.props.pairing].canon ?
+      this.props.pink : this.props.purple;
     var heart = (<span style={{color}}>♥</span>);
 
     var genres = _.chain(this.props.genres)
@@ -117,7 +166,10 @@ class Pairing extends Component {
     return (
       <div style={style}>
         <div>{images}</div>
-        <div>{this.props.selected} {heart} {other}</div>
+        <p>{this.props.selected} {heart} {other}</p>
+        <p>
+          <svg ref='legend' width={legendWidth + 2 * margin.left} height={22} />
+        </p>
         <div style={{position: 'relative'}}>
           <Reviews {...this.props} {...this.state} hoverCanvas={this.hoverCanvas} />
           {genres}
