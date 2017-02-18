@@ -277,10 +277,39 @@ class Timeline extends Component {
       image = (<img src={image.image} style={imageStyle} />);
     }
 
+    var dotSize = 10;
+    var legend = [[1, 'st', 'film'], [5, 'th', 'book']];
+    legend = _.map(legend, l => {
+      var [num, append, type] = l;
+      var style = {
+        display: 'inline-block',
+        margin: 5,
+      };
+      var dotStyle = {
+        display: 'inline-block',
+        width: dotSize + 2,
+        height: dotSize + 2,
+        border: '2px solid ' + this.props.gray,
+        borderRadius: dotSize + 2,
+        color: type === 'film' ? '#fff' : this.props.gray,
+        backgroundColor: type === 'film' ? this.props.gray : '#fff',
+        fontSize: dotSize,
+        lineHeight: (dotSize + 2) + 'px',
+      };
+      return (
+        <span style={style}>
+          <span className='header' style={dotStyle}>{num}</span> {append} {type}
+        </span>
+      );
+    });
+
     return (
       <div style={style}>
         <div>{image}</div>
         <div>{this.props.selected}</div>
+        <div>
+          {legend}
+        </div>
         <svg ref='container' width={width} height={height} />
       </div>
     );
