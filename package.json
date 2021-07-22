@@ -6,12 +6,12 @@
     "react-scripts": "0.8.5"
   },
   "dependencies": {
-    "chroma-js": "^1.2.1",
-    "d3": "^4.4.4",
-    "html2json": "^1.0.2",
-    "lodash": "^4.17.4",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "chroma-js": "1.2.1",
+    "d3": "4.4.4",
+    "html2json": "1.0.2",
+    "lodash": "4.17.4",
+    "react": "15.4.2",
+    "react-dom": "15.4.2"
   },
   "homepage": "http://sxywu.github.io/hpff",
   "scripts": {
